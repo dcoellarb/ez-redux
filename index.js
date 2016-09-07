@@ -3,4 +3,7 @@ import getActions from './actions';
 import reducer from './reducer';
 import middleware from './middleware'
 
-export default { api, getActions, reducer, middleware };
+export const api = api;
+export const getActions = getActions;
+export const reducer = reducer;
+export const middleware = middleware;
