@@ -9,31 +9,48 @@ const findItemIndex = (collection, item) => {
 };
 
 // Reducer
-const defaultState = { list: [], edit: {}, edits: [] };
+const defaultState = { list: [], edit: {}, edits: [], status: '' };
 export default (
   entity,
   state,
   action
 ) => {
   switch (action.type) {
+    // Status reducers
+    case `SET_${entity.toUpperCase()}S_STATUS`: {
+      return Object.assign({}, state, { status: action.status });
+    }
+
     // List reducers
     case `SET_${entity.toUpperCase()}S`: {
-      return Object.assign({}, state, { list: action.items });
+      return Object.assign({}, state, {
+        list: action.items,
+        status: ''
+      });
     }
     case `ADD_${entity.toUpperCase()}`: {
-      return Object.assign({}, state, { list: [...state.list, action.item] });
+      return Object.assign({}, state, {
+        list: [...state.list, action.item],
+        status: ''
+      });
     }
     case `REPLACE_${entity.toUpperCase()}`: {
       const index = findItemIndex(state.list, action.item);
       if (index >= 0) {
-        return Object.assign({}, state, { list: [
-          ...state.list.slice(0, index),
-          action.replacement,
-          ...state.list.slice(index + 1)
-        ] });
+        return Object.assign({}, state, {
+          list: [
+            ...state.list.slice(0, index),
+            action.replacement,
+            ...state.list.slice(index + 1)
+          ],
+          status: ''
+        });
       }
 
-      return [...state, action.replacement];
+      return Object.assign({}, state, {
+        list: [...state.list, action.replacement],
+        status: ''
+      });
     }
     case `REMOVE_${entity.toUpperCase()}`: {
       const index = findItemIndex(state.list, action.item);

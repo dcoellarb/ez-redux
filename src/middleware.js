@@ -21,6 +21,10 @@ export default (config = []) => store => next => action => {
 
   // List actions
   const getAll = () => {
+    next({
+      type: `SET_${entityConfig.name.toUpperCase()}S_STATUS`,
+      statu: 'loadingList'
+    });
     const suscription = api(entityConfig.name)
       .getAll(action.meta.params)
       .subscribe(
@@ -40,6 +44,10 @@ export default (config = []) => store => next => action => {
     return suscription;
   };
   const getRelation = () => {
+    next({
+      type: `SET_${entityConfig.name.toUpperCase()}S_STATUS`,
+      statu: 'loadingRelation'
+    });
     const suscription = api(entityConfig.name)
       .getRelation(action.item.object, action.meta.relation)
       .subscribe(
@@ -76,6 +84,11 @@ export default (config = []) => store => next => action => {
         updatedData
       }));
     }
+
+    next({
+      type: `SET_${entityConfig.name.toUpperCase()}S_STATUS`,
+      statu: 'saving'
+    });
     const deserializedObject = deserializeParseObject(
       config,
       entityConfig,
