@@ -1,65 +1,58 @@
-export default (entity) => {  
+export default (entity) => {
   const entityActions = {
-    getAll: () => ({
-      type: `GET_${entity.toUpperCase()}S`,
-      meta: {entity, action: 'getAll'},
+    // List actions
+    getAll: (params) => ({
+      type: `SET_${entity.toUpperCase()}S`,
+      meta: { entity, action: 'getAll', params },
       items: []
     }),
     getRelation: (item, relation) => ({
       type: `REPLACE_${entity.toUpperCase()}`,
-      meta: {entity, action: 'getRelation', relation},
+      meta: { entity, action: 'getRelation', relation },
       item,
-      replacement: Object.assign({},item)
-    }),    
-    create: (defaults) => ({
-      type: `CREATE_${entity.toUpperCase()}`,
-      meta: {entity, action: 'create', defaults},
-      item: {}
+      replacement: Object.assign({}, item)
     }),
-    change: (item, updatedData) => ({
-      type: `REPLACE_${entity.toUpperCase()}`,
-      meta: {entity, action: 'change', updatedData},
+    save: (item) => ({
+      meta: { entity, action: 'save' },
       item,
-      replacement: Object.assign({},item)
+      replacement: Object.assign({}, item)
     }),
     delete: (item) => ({
-      type: `DELETE_${entity.toUpperCase()}`,
+      type: `REMOVE_${entity.toUpperCase()}`,
       item
     }),
-    save: (item, updatedData) => ({
-      type: `REPLACE_${entity.toUpperCase()}`,
-      meta: {entity, action: 'save', updatedData},
-      item,
-      replacement: Object.assign({},item)
-    }),
 
-    //Arrays fields
-    createItem: (item, field, defaults) => ({
-      type: `CREATE_${entity.toUpperCase()}_ITEM`,
-      meta: {entity, action: 'createItem', field, defaults},
-      item,
-      subItem: {}
+    // Edit actions
+    setEdit: (item) => ({
+      type: `SET_EDIT_${entity.toUpperCase()}`,
+      item
     }),
-    changeItem: (item, field, subItem, updatedData) => ({
-      type: `REPLACE_${entity.toUpperCase()}_ITEM`,
-      meta: {entity, action: 'changeItem', field, updatedData},
-      item,
-      subItem,
-      replacement: Object.assign({},item)
+    change: (item, updatedData) => ({
+      type: `CHANGE_${entity.toUpperCase()}`,
+      meta: { entity, action: 'change', updatedData },
+      item
     }),
-    deleteItem: (item, field, subItem) => ({
-      type: `DELETE_${entity.toUpperCase()}_ITEM`,
-      meta: {entity, action: 'deleteItem', field},
-      item,
+    addItem: (field, subItem) => ({
+      meta: { entity, action: 'addItem', field },
       subItem
     }),
-    saveItem: (item, field, subItem, updatedData) => ({
-      type: `REPLACE_${entity.toUpperCase()}_ITEM`,
-      meta: {entity, action: 'saveItem', field, updatedData},
-      item,
-      subItem,
-      replacement: Object.assign({},item)
+    removeItem: (field, subItem) => ({
+      type: `REMOVE_${entity.toUpperCase()}_ITEM`,
+      field,
+      subItem
     }),
+
+    // Edits actions
+    setEditItem: (field, subItem) => ({
+      type: `SET_EDIT_${entity.toUpperCase()}_ITEM`,
+      field,
+      subItem
+    }),
+    changeItem: (field, subItem, updatedData) => ({
+      type: `CHANGE_EDIT_${entity.toUpperCase()}_ITEM`,
+      meta: { entity, action: 'changeItem', field, updatedData },
+      subItem
+    })
   };
 
   return entityActions;

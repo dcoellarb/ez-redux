@@ -1,98 +1,120 @@
 /// Helper functions
 const findItemIndex = (collection, item) => {
-  let index = collection.indexOf(item)
+  let index = collection.indexOf(item);
   if (index < 0) {
     const foundItem = collection.find(i => i.id === item.id);
     index = collection.indexOf(foundItem);
   }
-  return index
-}
+  return index;
+};
 
 // Reducer
-const initialState = [];
+const defaultState = { list: [], edit: {}, edits: [] };
 export default (
   entity,
-  state = initialState,
+  initialState,
+  state = Object.assing({}, defaultState, initialState),
   action
 ) => {
   switch (action.type) {
-    case `GET_${entity.toUpperCase()}S`: {
-      return action.items;
-    }    
-    case `CREATE_${entity.toUpperCase()}`: {
-      return [...state, action.item];
+    // List reducers
+    case `SET_${entity.toUpperCase()}S`: {
+      return Object.assign({}, state, { list: action.items });
+    }
+    case `ADD_${entity.toUpperCase()}`: {
+      return Object.assign({}, state, { list: [...state.list, action.item] });
     }
     case `REPLACE_${entity.toUpperCase()}`: {
-      const index = findItemIndex(state, action.item);
-      if (index >= 0){
-        return [
-          ...state.slice(0, index),
-           action.replacement,
-          ...state.slice(index + 1)
-        ]        
-      } else {
-        return [...state, action.replacement]
+      const index = findItemIndex(state.list, action.item);
+      if (index >= 0) {
+        return Object.assign({}, state, { list: [
+          ...state.list.slice(0, index),
+          action.replacement,
+          ...state.list.slice(index + 1)
+        ] });
       }
+
+      return [...state, action.replacement];
     }
-    case `DELETE_${entity.toUpperCase()}`: {
-      const index = findItemIndex(state,action.item);
-      return [
-        ...state.slice(0, index),
-        ...state.slice(index + 1)
-      ]
+    case `REMOVE_${entity.toUpperCase()}`: {
+      const index = findItemIndex(state.list, action.item);
+      return Object.assign({}, state, { list: [
+        ...state.list.slice(0, index),
+        ...state.list.slice(index + 1)
+      ] });
     }
-    
-    case `CREATE_${entity.toUpperCase()}_ITEM`: {
-      const indexItem = findItemIndex(state,action.item);      
-      const replaceItem = Object.assign({}, state[indexItem]);
-      replaceItem[action.meta.field] = [
-        ...state[indexItem][action.meta.field],
-        action.subItem
-      ]
-      console.dir(replaceItem);
-      return [
-        ...state.slice(0, indexItem),
-        replaceItem,
-        ...state.slice(indexItem + 1)
-      ]
+
+    // Edit reducers
+    case `SET_EDIT_${entity.toUpperCase()}`: {
+      return Object.assign({}, state, { edit: action.item });
     }
-    case `REPLACE_${entity.toUpperCase()}_ITEM`: {
-      const indexItem = findItemIndex(state, action.item);
-      const indexSubItem = findItemIndex(action.item[action.meta.field], action.subItem);
-      const replaceItem = Object.assign({}, state[indexItem]);
-      replaceItem[action.meta.field] = [
-        ...state[indexItem][action.meta.field].slice(0, indexSubItem),
-        action.replacement,
-        ...state[indexItem][action.meta.field].slice(indexSubItem + 1)
-      ]
-      return [
-        ...state.slice(0, indexItem),
-        replaceItem,
-        ...state.slice(indexItem + 1)
-      ]
+    case `CHANGE_${entity.toUpperCase()}`: {
+      return Object.assign({}, state, {
+        edit: Object.assign({}, state.edit, action.updatedData)
+      });
     }
-    case `DELETE_${entity.toUpperCase()}_ITEM`: {
-      const indexItem = findItemIndex(state, action.item);
-      const indexSubItem = findItemIndex(action.item[action.meta.field], action.subItem);
-      const replaceItem = Object.assign({}, state[indexItem]);
-      replaceItem[action.meta.field] = [
-        ...state[indexItem][action.meta.field].slice(0, indexSubItem),
-        ...state[indexItem][action.meta.field].slice(indexSubItem + 1)
-      ]
-      return [
-        ...state.slice(0, indexItem),
-        replaceItem,
-        ...state.slice(indexItem + 1)
-      ]
+    case `ADD_${entity.toUpperCase()}_ITEM`: {
+      const newState = Object.assign({}, state);
+      if (state.edit[action.field]) {
+        newState.edit[action.field] = [...state.edit[action.field], action.subItem];
+      } else {
+        newState.edit[action.field] = [action.subItem];
+      }
+      return newState;
+    }
+    case `REMOVE_${entity.toUpperCase()}_ITEM`: {
+      const indexSubItem = findItemIndex(state.edit[action.field], action.subItem);
+      const newState = Object.assign({}, state);
+      newState.edit[action.field] = [
+        ...state.edit[action.field].splice(0, indexSubItem),
+        ...state.edit[action.field].slice(indexSubItem + 1)
+      ];
+      return newState;
+    }
+
+    // Edits reducers
+    case `SET_EDIT_${entity.toUpperCase()}_ITEM`: {
+      const editSubItem = state.edits.find(e => e.field === action.field);
+      const index = state.edits.indexOf(editSubItem);
+      const newEditSubItem = Object.assign({}, editSubItem, {
+        data: action.subItem
+      });
+      return Object.assign({}, state, {
+        edits: [
+          ...state.edits.slice(0, index),
+          newEditSubItem,
+          ...state.edits.slice(index + 1)
+        ]
+      });
+    }
+    case `CHANGE_${entity.toUpperCase()}_ITEM`: {
+      const editSubItem = state.edits.find(e => e.field === action.field);
+      const index = state.edits.indexOf(editSubItem);
+      const newEditSubItem = Object.assign({}, editSubItem, {
+        data: Object.assign({}, editSubItem.data, action.updatedFields)
+      });
+      return Object.assign({}, state, {
+        edits: [
+          ...state.edits.slice(0, index),
+          newEditSubItem,
+          ...state.edits.slice(index + 1)
+        ]
+      });
     }
     // Intial state
     default: {
       return false;
     }
   }
-}
+};
 
 // Selectors
-export const getItems = (state) => {
-  return state;
-}
+export const getItems = (state) => (
+  state.list
+);
+export const getEdit = (state) => (
+  state.edit
+);
+export const getEditItem = (field, state) => (
+  state.edits.find(e => e.field === field).data
+);

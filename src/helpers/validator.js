@@ -1,9 +1,9 @@
 export default (entityConfig, item, updateData) => {
   if (entityConfig.validate) {
-    let mergeValidation = Object.assign({},{
+    let mergeValidation = Object.assign({}, {
       errors: item.errors,
       warnings: item.warnings
-    });  
+    });
     const validation = entityConfig.validate(updateData);
     validation.errors.forEach(e => {
       if (!mergeValidation.errors.find(me => e.code === e.code)) {

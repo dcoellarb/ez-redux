@@ -1,31 +1,31 @@
 import Parse from 'parse-env-chooser';
 import Rx from 'rx';
 
-const getParams = {filters: [], includes:[]}
+const getParams = { filters: [], includes: [] };
 export default (entity) => ({
   create: () => {
     const Entity = Parse.Object.extend(entity);
     return new Entity();
   },
   getAll: (params = {}) => {
-    const queryParams = Object.assign(getParams,params)
+    const queryParams = Object.assign(getParams, params);
     const ParseObject = Parse.Object.extend(entity);
     const query = new Parse.Query(ParseObject);
     queryParams.includes.forEach(include => {
       query.include(include);
-    })
+    });
     queryParams.filters.forEach(filter => {
-      query.equalTo(filter.field,filter.value);
-    })
+      query.equalTo(filter.field, filter.value);
+    });
     return Rx.Observable.fromPromise(query.find());
   },
   get: (id, params = {}) => {
-    const queryParams = Object.assign(getParams,params)    
+    const queryParams = Object.assign(getParams, params);
     const ParseObject = Parse.Object.extend(entity);
     const query = new Parse.Query(ParseObject);
     queryParams.includes.forEach(include => {
       query.include(include);
-    })
+    });
     return Rx.Observable.fromPromise(query.get(id));
   },
   getRelation: (parseObject, field) => {
