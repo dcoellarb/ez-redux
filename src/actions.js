@@ -49,7 +49,7 @@ export default (entity) => {
       subItem
     }),
     changeItem: (field, subItem, updatedData) => ({
-      type: `CHANGE_EDIT_${entity.toUpperCase()}_ITEM`,
+      type: `CHANGE_${entity.toUpperCase()}_ITEM`,
       meta: { entity, action: 'changeItem', field, updatedData },
       subItem
     })
