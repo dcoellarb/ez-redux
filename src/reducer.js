@@ -102,7 +102,7 @@ export default (
     }
     // Intial state
     default: {
-      return Object.assing({}, defaultState, state);
+      return Object.assign({}, defaultState, state);
     }
   }
 };
