@@ -1,3 +1,4 @@
+import api from './../api';
 import { findAndInitializeEntityConfig, initializeEntityConfig } from './initializer'; 
 
 export const serializeParseObject = (config, entityConfig, parseObject) => {
@@ -17,7 +18,7 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
         throw `No entity found for pointer:${prop}`;
       }
     
-    }else if(parseObject.attributes[prop] instanceof Array){
+    } else if (parseObject.attributes[prop] instanceof Array){
       serializedObject[prop] = parseObject.attributes[prop].map((item) => {
         if (item.constructor && (item.constructor.name === 'ParseObject' || 
           item.constructor.name === 'ParseObjectSubclass')) {
