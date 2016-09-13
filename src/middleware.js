@@ -168,7 +168,6 @@ export default (config = []) => store => next => action => {
     updatedData = validate(entityConfig, action.subItem, action.meta.updatedData);
     if (updatedData && updatedData.errors.length > 0) {
       return next(Object.assign({}, action, {
-        type: `CHANGE_${entityConfig.name.toUpperCase()}_ITEM`,
         field: action.meta.field,
         updatedData
       }));

@@ -90,7 +90,7 @@ export default (
       const editSubItem = state.edits.find(e => e.field === action.field);
       const index = state.edits.indexOf(editSubItem);
       const newEditSubItem = Object.assign({}, editSubItem, {
-        data: Object.assign({}, editSubItem.data, action.updatedFields)
+        data: Object.assign({}, editSubItem.data, action.updatedData)
       });
       return Object.assign({}, state, {
         edits: [
