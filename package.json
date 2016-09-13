@@ -1,6 +1,6 @@
 {
   "name": "ez-redux",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Library to manage parse objects and simplify integration with parse",
   "main": "./dist/index.js",
   "scripts": {

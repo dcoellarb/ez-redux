@@ -12,8 +12,7 @@ const findItemIndex = (collection, item) => {
 const defaultState = { list: [], edit: {}, edits: [] };
 export default (
   entity,
-  initialState,
-  state = Object.assing({}, defaultState, initialState),
+  state,
   action
 ) => {
   switch (action.type) {
@@ -103,7 +102,7 @@ export default (
     }
     // Intial state
     default: {
-      return false;
+      return Object.assing({}, defaultState, state);
     }
   }
 };
