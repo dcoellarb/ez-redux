@@ -1,51 +1,52 @@
 import api from './../api';
-import { findAndInitializeEntityConfig, initializeEntityConfig } from './initializer'; 
+import { findAndInitializeEntityConfig, initializeEntityConfig } from './initializer';
 
 export const serializeParseObject = (config, entityConfig, parseObject) => {
   const serializedObject = {};
   Object.keys(parseObject.attributes).map((prop) => {
-    if (parseObject.attributes[prop].constructor.name === 'ParseObject' || 
-      parseObject.attributes[prop].constructor.name === 'ParseObjectSubclass'){
-      const subEntity = entityConfig.mapPointersToFields.find(e => e.field === prop);
-      if (subEntity) {
-        const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
-        if (subEntityConfig) {
-          serializedObject[prop] = serializeParseObject(config, subEntityConfig, parseObject.attributes[prop]);
+    if (parseObject.attributes[prop]) {
+      if (parseObject.attributes[prop].constructor.name === 'ParseObject' ||
+        parseObject.attributes[prop].constructor.name === 'ParseObjectSubclass') {
+        const subEntity = entityConfig.mapPointersToFields.find(e => e.field === prop);
+        if (subEntity) {
+          const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+          if (subEntityConfig) {
+            serializedObject[prop] = serializeParseObject(config, subEntityConfig, parseObject.attributes[prop]);
+          } else {
+            throw `No entity config found for pointer:${prop}`;
+          }
         } else {
-          throw `No entity config found for pointer:${prop}`;
+          throw `No entity found for pointer:${prop}`;
         }
-      } else {
-        throw `No entity found for pointer:${prop}`;
-      }
-    
-    } else if (parseObject.attributes[prop] instanceof Array){
-      serializedObject[prop] = parseObject.attributes[prop].map((item) => {
-        if (item.constructor && (item.constructor.name === 'ParseObject' || 
-          item.constructor.name === 'ParseObjectSubclass')) {
+      } else if (parseObject.attributes[prop] instanceof Array){
+        serializedObject[prop] = parseObject.attributes[prop].map((item) => {
+          if (item.constructor && (item.constructor.name === 'ParseObject' || 
+            item.constructor.name === 'ParseObjectSubclass')) {
 
-          const subEntity = entityConfig.mapArraysToFields.find(e => e.field === prop);
-          if (subEntity) {
-            const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
-            if (subEntityConfig) {
-              return serializeParseObject(config, subEntityConfig, item);
+            const subEntity = entityConfig.mapArraysToFields.find(e => e.field === prop);
+            if (subEntity) {
+              const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+              if (subEntityConfig) {
+                return serializeParseObject(config, subEntityConfig, item);
+              }
+              throw `No entity config found for array:${prop}`;
             } else {
               throw `No entity config found for array:${prop}`;
             }
           } else {
-            throw `No entity config found for array:${prop}`;
+            return item;
           }
-        } else {
-          return item;
-        }
-      });
-    }else if(entityConfig.nonStoredFields.indexOf(prop) === -1) {
-      serializedObject[prop] = parseObject.attributes[prop];
+        });
+      } else if (entityConfig.nonStoredFields.indexOf(prop) === -1) {
+        serializedObject[prop] = parseObject.attributes[prop];
+      }
     }
   });
   serializedObject.id = parseObject.id;
   serializedObject.object = parseObject;
   return serializedObject;
-}
+};
+
 export const deserializeParseObject = (config, entityConfig, serializedObject) => { 
   if (!serializedObject.object) {
     serializedObject.object = api(entityConfig.name).create();
