@@ -9,7 +9,7 @@ const findItemIndex = (collection, item) => {
 };
 
 // Reducer
-const defaultState = { list: [], edit: {}, edits: [], status: '' };
+const defaultState = { list: [], edit: undefined, edits: [], status: '' };
 export default (
   entity,
   state,
