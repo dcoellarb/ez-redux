@@ -1,9 +1,8 @@
-import parseEnvChooser from 'parse-env-chooser';
 import Rx from 'rxjs';
 
 const getParams = { filters: [], includes: [] };
-export default (env) => {
-  const Parse = parseEnvChooser(env);
+export default (parse) => {
+  const Parse = parse;
   return (entity) => ({
     create: () => {
       const Entity = Parse.Object.extend(entity);

@@ -7,8 +7,8 @@ import {
   updateSerializedObject
 } from './helpers/serializer';
 
-export default (env) => {
-  const api = apiEnvChooser(env);
+export default (parse) => {
+  const api = apiEnvChooser(parse);
   return (config = []) => store => next => action => {
     if (!action.meta) {
       return next(action);
@@ -19,7 +19,7 @@ export default (env) => {
       return next(action);
     }
     const entityConfig = initializeEntityConfig(foundConfig);
-    entityConfig.env = env;
+    entityConfig.parse = parse;
 
     // List actions
     const getAll = () => {

@@ -49,7 +49,7 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
 
 export const deserializeParseObject = (config, entityConfig, serializedObject) => { 
   if (!serializedObject.object) {
-    serializedObject.object = apiEnvChooser(entityConfig.env)(entityConfig.name).create();
+    serializedObject.object = apiEnvChooser(entityConfig.parse)(entityConfig.name).create();
   }
   Object.keys(serializedObject).map((prop) => {
     if (entityConfig.nonStoredFields.indexOf(prop) === -1) {
