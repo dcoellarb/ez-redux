@@ -1,4 +1,4 @@
-import api from './../api';
+import apiEnvChooser from './../api';
 import { findAndInitializeEntityConfig, initializeEntityConfig } from './initializer';
 
 export const serializeParseObject = (config, entityConfig, parseObject) => {
@@ -49,7 +49,7 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
 
 export const deserializeParseObject = (config, entityConfig, serializedObject) => { 
   if (!serializedObject.object) {
-    serializedObject.object = api(entityConfig.name).create();
+    serializedObject.object = apiEnvChooser(entityConfig.env).(entityConfig.name).create();
   }
   Object.keys(serializedObject).map((prop) => {
     if (entityConfig.nonStoredFields.indexOf(prop) === -1) {
