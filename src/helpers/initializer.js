@@ -10,15 +10,14 @@ const defaultEntityConfig = {
     warnings: []
   })
 };
-export const initializeEntityConfig = (foundConfig) => {
-  const entityConfig = Object.assign(defaultEntityConfig, foundConfig);
-  entityConfig.nonStoredFields = [...entityConfig.nonStoredFields, ...ignoredFields];
-  return entityConfig;
-};
-export const findAndInitializeEntityConfig = (config, entity) => {
+
+export const initializeEntityConfig = (config, entity) => {
   const foundConfig = config.find(e => e.name === entity);
   if (!foundConfig) {
     return foundConfig;
   }
-  return initializeEntityConfig(foundConfig);
+
+  const entityConfig = Object.assign(defaultEntityConfig, foundConfig);
+  entityConfig.nonStoredFields = [...entityConfig.nonStoredFields, ...ignoredFields];
+  return entityConfig;
 };

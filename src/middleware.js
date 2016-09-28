@@ -1,6 +1,6 @@
 import apiEnvChooser from './api';
 import validate from './helpers/validator';
-import { findAndInitializeEntityConfig, initializeEntityConfig } from './helpers/initializer'; 
+import { initializeEntityConfig } from './helpers/initializer';
 import {
   serializeParseObject,
   deserializeParseObject,
@@ -18,19 +18,18 @@ export default (parse) => {
     if (!foundConfig) {
       return next(action);
     }
-    const entityConfig = initializeEntityConfig(foundConfig);
-    entityConfig.parse = parse;
 
     // List actions
     const getAll = () => {
       next({
-        type: `SET_${entityConfig.name.toUpperCase()}S_STATUS`,
+        type: `SET_${action.meta.entity.toUpperCase()}S_STATUS`,
         status: 'loadingList'
       });
-      const suscription = api(entityConfig.name)
+      const suscription = api(action.meta.entity)
         .getAll(action.meta.params)
         .subscribe(
           (items) => {
+            const entityConfig = initializeEntityConfig(config, action.meta.entity);
             next(Object.assign({}, action, {
               items: items.map((item) =>
                 serializeParseObject(config, entityConfig, item)
@@ -47,19 +46,20 @@ export default (parse) => {
     };
     const getRelation = () => {
       next({
-        type: `SET_${entityConfig.name.toUpperCase()}S_STATUS`,
+        type: `SET_${action.meta.entity.toUpperCase()}S_STATUS`,
         status: 'loadingRelation'
       });
-      const suscription = api(entityConfig.name)
+      const suscription = api(action.meta.entity)
         .getRelation(action.item.object, action.meta.relation)
         .subscribe(
           (related) => {
             const updatedData = {};
+            const entityConfig = initializeEntityConfig(config, action.meta.entity);
             const subEntity = entityConfig.mapRealtionsToFields.find(e => e.field === action.meta.relation);
             if (subEntity) {
-              const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+              const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
               if (subEntityConfig) {
-                updatedData[action.meta.relation] = related.map(r => serializeParseObject(config, subEntityConfig, r))
+                updatedData[action.meta.relation] = related.map(r => serializeParseObject(config, subEntityConfig, r));
               } else {
                 throw `No entity config found for relation:${action.meta.relation}`;
               }
@@ -79,6 +79,7 @@ export default (parse) => {
       return suscription;
     };
     const save = () => {
+      let entityConfig = initializeEntityConfig(config, action.meta.entity);
       const updatedData = validate(entityConfig, action.item);
       if (updatedData && updatedData.errors.length > 0) {
         return next(Object.assign({}, action, {
@@ -88,7 +89,7 @@ export default (parse) => {
       }
 
       next({
-        type: `SET_${entityConfig.name.toUpperCase()}S_STATUS`,
+        type: `SET_${action.meta.entity.toUpperCase()}S_STATUS`,
         status: 'saving'
       });
       const deserializedObject = deserializeParseObject(
@@ -100,6 +101,7 @@ export default (parse) => {
         .save(deserializedObject)
         .subscribe(
           (result) => {
+            entityConfig = initializeEntityConfig(config, action.meta.entity);
             if (action.item.id) {
               next(Object.assign({}, action, {
                 type: `REPLACE_${entityConfig.name.toUpperCase()}`,
@@ -123,15 +125,17 @@ export default (parse) => {
 
     // Edit actions
     const change = () => {
+      const entityConfig = initializeEntityConfig(config, action.meta.entity);
       const updatedData = validate(entityConfig, action.item, action.meta.updatedData);
       return next(Object.assign({}, action, {
         updatedData
       }));
     };
     const addItem = () => {
+      const entityConfig = initializeEntityConfig(config, action.meta.entity);
       const subEntity = entityConfig.mapArraysToFields.find(e => e.field === action.meta.field);
       if (subEntity) {
-        const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+        const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
         if (subEntityConfig) {
           const updatedData = validate(subEntityConfig, action.subItem);
           if (updatedData && updatedData.errors.length > 0) {
@@ -166,10 +170,11 @@ export default (parse) => {
 
     // Edits actions
     const changeItem = () => {
+      const entityConfig = initializeEntityConfig(config, action.meta.entity);
       let updatedData = action.meta.updatedData;
       const subEntity = entityConfig.mapArraysToFields.find(e => e.field === action.meta.field);
       if (subEntity) {
-        const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+        const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
         if (subEntityConfig) {
           updatedData = validate(subEntityConfig, action.subItem, action.meta.updatedData);
           return next(Object.assign({}, action, {
