@@ -1,5 +1,5 @@
 import apiEnvChooser from './../api';
-import { findAndInitializeEntityConfig, initializeEntityConfig } from './initializer';
+import { initializeEntityConfig } from './initializer';
 
 export const serializeParseObject = (config, entityConfig, parseObject) => {
   const serializedObject = {};
@@ -9,7 +9,7 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
         parseObject.attributes[prop].constructor.name === 'ParseObjectSubclass') {
         const subEntity = entityConfig.mapPointersToFields.find(e => e.field === prop);
         if (subEntity) {
-          const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+          const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
           if (subEntityConfig) {
             serializedObject[prop] = serializeParseObject(config, subEntityConfig, parseObject.attributes[prop]);
           } else {
@@ -25,7 +25,7 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
 
             const subEntity = entityConfig.mapArraysToFields.find(e => e.field === prop);
             if (subEntity) {
-              const subEntityConfig = findAndInitializeEntityConfig(config, subEntity.entity);
+              const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
               if (subEntityConfig) {
                 return serializeParseObject(config, subEntityConfig, item);
               }
