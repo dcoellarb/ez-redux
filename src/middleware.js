@@ -43,8 +43,8 @@ export default (parse) => {
             if (action.meta.params && (action.meta.params.includes || action.meta.params.relations)) {
               const params = Object.assign({}, { includes: [], relations: [] }, action.meta.params);
               [
-                params.includes.map((i) => i.field),
-                params.relations.map((r) => r.field)
+                ...params.includes.map((i) => i.field),
+                ...params.relations.map((r) => r.field)
               ].forEach(include => {
                 let isPointer = false;
                 let isArrayObject = false;
