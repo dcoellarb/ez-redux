@@ -35,7 +35,7 @@ export default (parse) => {
       return Rx.Observable.fromPromise(query.find());
     },
     get: (id, params = {}) => {
-      const queryParams = Object.assign(getParams, params);
+      const queryParams = Object.assign({}, getParams, params);
       const ParseObject = Parse.Object.extend(entity);
       const query = new Parse.Query(ParseObject);
       queryParams.includes.forEach(include => {
