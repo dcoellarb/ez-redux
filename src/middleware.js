@@ -58,12 +58,12 @@ export default (parse) => {
                   serializedItems.forEach((item) => {
                     if (isPointer) {
                       next({
-                        type: `SET_${subEntity.entity.toUpperCase()}`,
+                        type: `SET_${subEntity.entity.toUpperCase()}S`,
                         item: item[include]
                       });
                     } else {
                       next({
-                        type: `SET_${subEntity.entity.toUpperCase()}`,
+                        type: `SET_${subEntity.entity.toUpperCase()}S`,
                         items: item[include]
                       });
                     }
@@ -107,7 +107,7 @@ export default (parse) => {
 
                 // Update pointer in their reducer
                 next({
-                  type: `SET_${subEntity.entity.toUpperCase()}`,
+                  type: `SET_${subEntity.entity.toUpperCase()}S`,
                   items: serializedRelated
                 });
               } else {
@@ -150,7 +150,7 @@ export default (parse) => {
           (result) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
             next(Object.assign({}, action, {
-              type: `SET_${entityConfig.name.toUpperCase()}`,
+              type: `SET_${entityConfig.name.toUpperCase()}S`,
               item: serializeParseObject(config, entityConfig, result)
             }));
           },
