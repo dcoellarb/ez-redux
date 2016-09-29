@@ -30,11 +30,29 @@ export default (parse) => {
         .subscribe(
           (items) => {
             const entityConfig = initializeEntityConfig(config, action.meta.entity);
-            next(Object.assign({}, action, {
-              items: items.map((item) =>
-                serializeParseObject(config, entityConfig, item)
-              )
-            }));
+            // Sent items to reducer
+            const serializedItems = items.map((item) =>
+              serializeParseObject(config, entityConfig, item)
+            );
+            next(Object.assign({}, action, { items: serializedItems }));
+
+            // Update pointer in their reducers
+            if (action.meta.params && action.meta.params.includes) {
+              action.meta.params.includes.forEach(include => {
+                const subEntity = entityConfig.mapPointersToFields.find(e => e.field === include);
+                if (subEntity) {
+                  serializedItems.forEach((item) => {
+                    next({
+                      type: `REPLACE_${subEntity.entity.toUpperCase()}`,
+                      item: item[include],
+                      replacement: item[include]
+                    });
+                  });
+                } else {
+                  throw `No entity found for pointer:${include}`;
+                }
+              });
+            }
           },
           (error) => {
             console.dir(error);
@@ -53,22 +71,35 @@ export default (parse) => {
         .getRelation(action.item.object, action.meta.relation)
         .subscribe(
           (related) => {
-            const updatedData = {};
             const entityConfig = initializeEntityConfig(config, action.meta.entity);
             const subEntity = entityConfig.mapRealtionsToFields.find(e => e.field === action.meta.relation);
             if (subEntity) {
               const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
               if (subEntityConfig) {
-                updatedData[action.meta.relation] = related.map(r => serializeParseObject(config, subEntityConfig, r));
+                // Update item with relations
+                const serializedRelated = related.map(r => serializeParseObject(config, subEntityConfig, r));
+                const updatedData = {};
+                updatedData[action.meta.relation] = Object.assign({}, action.item[action.meta.relation], {
+                  relations: serializedRelated
+                });
+                next(Object.assign({}, action, {
+                  replacement: updateSerializedObject(config, entityConfig, action.item, updatedData)
+                }));
+
+                // Update pointer in their reducer
+                serializedRelated.forEach((relatedItem) => {
+                  next({
+                    type: `REPLACE_${subEntity.entity.toUpperCase()}`,
+                    item: relatedItem,
+                    replacement: relatedItem
+                  });
+                });
               } else {
                 throw `No entity config found for relation:${action.meta.relation}`;
               }
             } else {
               throw `No entity config found for relation:${action.meta.relation}`;
             }
-            next(Object.assign({}, action, {
-              replacement: updateSerializedObject(config, entityConfig, action.item, updatedData)
-            }));
           },
           (error) => {
             console.dir(error);

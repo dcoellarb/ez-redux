@@ -1,6 +1,6 @@
 import Rx from 'rxjs';
 
-const getParams = { filters: [], includes: [] };
+const getParams = { filters: [], includes: [], relations: [] };
 export default (parse) => {
   const Parse = parse;
   return (entity) => ({
