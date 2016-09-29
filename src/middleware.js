@@ -44,28 +44,66 @@ export default (parse) => {
               action.meta.params.includes.forEach(include => {
                 let isPointer = false;
                 let isArrayObject = false;
+                let isRelation = false;
                 let subEntity = entityConfig.mapPointersToFields.find(e => e.field === include);
+                let subEntityConfig;
                 if (subEntity) {
                   isPointer = true;
                 } else {
                   subEntity = entityConfig.mapArraysToFields.find(e => e.field === include);
                   if (subEntity) {
                     isArrayObject = true;
+                  } else {
+                    subEntity = entityConfig.mapRealtionsToFields.find(e => e.field === include);
+                    if (subEntity) {
+                      subEntityConfig = initializeEntityConfig(config, subEntity.entity);
+                      isRelation = true;
+                    }
                   }
                 }
 
-                if (isPointer || isArrayObject) {
+                if (isPointer || isArrayObject || isRelation) {
                   serializedItems.forEach((item) => {
                     if (isPointer) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
                         item: item[include]
                       });
-                    } else {
+                    } else if (isArrayObject) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
                         items: item[include]
                       });
+                    } else {
+                      api(action.meta.entity)
+                        .getRelation(item.object, include)
+                        .subscribe(
+                          (subItems) => {
+                            const serializedSubitems = subItems.map((i) =>
+                              serializeParseObject(config, subEntityConfig, i)
+                            );
+
+                            // Update item with relations
+                            const updatedItem = Object.assign({}, item);
+                            updatedItem[include] = Object.assign({}, updatedItem[include], {
+                              relations: serializedSubitems
+                            });
+                            next({
+                              type: `SET_${action.meta.entity.toUpperCase()}S`,
+                              item: updatedItem
+                            });
+
+                            // Update relations in their reducer
+                            next({
+                              type: `SET_${subEntity.entity.toUpperCase()}S`,
+                              items: serializedSubitems
+                            });
+                          },
+                          (error) => {
+                            console.dir(error);
+                          },
+                          () => {}
+                        );
                     }
                   });
                 }
