@@ -41,7 +41,10 @@ export default (parse) => {
 
             // Update pointer in their reducers
             if (action.meta.params && (action.meta.params.includes || action.meta.params.relations)) {
-              [...action.meta.params.includes, ...action.meta.params.relations].forEach(include => {
+              [
+                ...action.meta.params.includes.map((i) => i.field),
+                ...action.meta.params.relations.map((r) => r.field)
+              ].forEach(include => {
                 let isPointer = false;
                 let isArrayObject = false;
                 let isRelation = false;
