@@ -2,16 +2,17 @@ export default (entity) => {
   const entityActions = {
     // List actions
     getAll: (params) => ({
-      type: `SET_${entity.toUpperCase()}S`,
+      type: `GET_${entity.toUpperCase()}S`,
       meta: { entity, action: 'getAll', params },
       items: []
     }),
     getRelation: (item, relation) => ({
-      type: `SET_${entity.toUpperCase()}`,
+      type: `GET_${entity.toUpperCase()}_RELATION`,
       meta: { entity, action: 'getRelation', relation },
       item
     }),
     save: (item) => ({
+      type: `SAVE_${entity.toUpperCase()}`,
       meta: { entity, action: 'save' },
       item
     }),
@@ -31,6 +32,7 @@ export default (entity) => {
       item
     }),
     addItem: (field, subItem) => ({
+      type: `ADD_${entity.toUpperCase()}_ITEM`,
       meta: { entity, action: 'addItem', field },
       subItem
     }),

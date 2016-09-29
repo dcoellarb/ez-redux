@@ -36,7 +36,7 @@ export default (
     case `SET_${entity.toUpperCase()}S`: {
       let list = [...state.list];
       if (action.items) {
-        action.items.forEach((item) => { list = replactItem(list, item); });        
+        action.items.forEach((item) => { list = replactItem(list, item); });
       }
       if (action.item) {
         list = replactItem(state.list, action.item);
@@ -55,10 +55,10 @@ export default (
     }
 
     // Edit reducers
-    case `SET_EDIT_${entity.toUpperCase()}`: {
+    case `SET_${entity.toUpperCase()}_EDIT`: {
       return Object.assign({}, state, { edit: action.item });
     }
-    case `CHANGE_${entity.toUpperCase()}`: {
+    case `CHANGE_${entity.toUpperCase()}_EDIT`: {
       return Object.assign({}, state, {
         edit: Object.assign({}, state.edit, action.updatedData)
       });
