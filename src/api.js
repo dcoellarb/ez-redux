@@ -6,7 +6,7 @@ const getIncludes = (prefix, includes) => {
     const includeWithPrefix = prefix ? `${prefix}.${include.field}` : include.field;
     list.push(includeWithPrefix);
     if (include.includes) {
-      list = [...list, getIncludes(includeWithPrefix, include.includes)];
+      list = [...list, ...getIncludes(includeWithPrefix, include.includes)];
     }
   });
   return list;
