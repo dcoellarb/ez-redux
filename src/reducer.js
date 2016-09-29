@@ -10,7 +10,7 @@ const replactItem = (stateList, item) => {
   if (index >= 0) {
     list = [
       ...list.slice(0, index),
-      item,
+      Object.assign({}, list[index], item),
       ...list.slice(index + 1)
     ];
   } else {
