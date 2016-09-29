@@ -9,9 +9,9 @@ const replactItem = (stateList, item) => {
   const index = findItemIndex(list, item);
   if (index >= 0) {
     list = [
-      list.slice(0, index),
+      ...list.slice(0, index),
       item,
-      list.slice(index + 1)
+      ...list.slice(index + 1)
     ];
   } else {
     list = [...list, item];
