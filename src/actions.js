@@ -7,15 +7,13 @@ export default (entity) => {
       items: []
     }),
     getRelation: (item, relation) => ({
-      type: `REPLACE_${entity.toUpperCase()}`,
+      type: `SET_${entity.toUpperCase()}`,
       meta: { entity, action: 'getRelation', relation },
-      item,
-      replacement: Object.assign({}, item)
+      item
     }),
     save: (item) => ({
       meta: { entity, action: 'save' },
-      item,
-      replacement: Object.assign({}, item)
+      item
     }),
     delete: (item) => ({
       type: `REMOVE_${entity.toUpperCase()}`,

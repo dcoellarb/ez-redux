@@ -34,22 +34,40 @@ export default (parse) => {
             const serializedItems = items.map((item) =>
               serializeParseObject(config, entityConfig, item)
             );
-            next(Object.assign({}, action, { items: serializedItems }));
+            next({
+              type: `SET_${action.meta.entity.toUpperCase()}S`,
+              items: serializedItems
+            });
 
             // Update pointer in their reducers
             if (action.meta.params && action.meta.params.includes) {
               action.meta.params.includes.forEach(include => {
-                const subEntity = entityConfig.mapPointersToFields.find(e => e.field === include);
+                let isPointer = false;
+                let isArrayObject = false;
+                let subEntity = entityConfig.mapPointersToFields.find(e => e.field === include);
                 if (subEntity) {
-                  serializedItems.forEach((item) => {
-                    next({
-                      type: `REPLACE_${subEntity.entity.toUpperCase()}`,
-                      item: item[include],
-                      replacement: item[include]
-                    });
-                  });
+                  isPointer = true;
                 } else {
-                  throw `No entity found for pointer:${include}`;
+                  subEntity = entityConfig.mapArraysToFields.find(e => e.field === include);
+                  if (subEntity) {
+                    isArrayObject = true;
+                  }
+                }
+
+                if (isPointer || isArrayObject) {
+                  serializedItems.forEach((item) => {
+                    if (isPointer) {
+                      next({
+                        type: `SET_${subEntity.entity.toUpperCase()}`,
+                        item: item[include]
+                      });
+                    } else {
+                      next({
+                        type: `SET_${subEntity.entity.toUpperCase()}`,
+                        items: item[include]
+                      });
+                    }
+                  });
                 }
               });
             }
@@ -82,17 +100,15 @@ export default (parse) => {
                 updatedData[action.meta.relation] = Object.assign({}, action.item[action.meta.relation], {
                   relations: serializedRelated
                 });
-                next(Object.assign({}, action, {
-                  replacement: updateSerializedObject(config, entityConfig, action.item, updatedData)
-                }));
+                next({
+                  type: `SET_${action.meta.entity.toUpperCase()}S`,
+                  item: updateSerializedObject(config, entityConfig, action.item, updatedData)
+                });
 
                 // Update pointer in their reducer
-                serializedRelated.forEach((relatedItem) => {
-                  next({
-                    type: `REPLACE_${subEntity.entity.toUpperCase()}`,
-                    item: relatedItem,
-                    replacement: relatedItem
-                  });
+                next({
+                  type: `SET_${subEntity.entity.toUpperCase()}`,
+                  items: serializedRelated
                 });
               } else {
                 throw `No entity config found for relation:${action.meta.relation}`;
@@ -113,10 +129,10 @@ export default (parse) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
       const updatedData = validate(entityConfig, action.item);
       if (updatedData && updatedData.errors.length > 0) {
-        return next(Object.assign({}, action, {
+        return next({
           type: `CHANGE_${entityConfig.name.toUpperCase()}`,
           updatedData
-        }));
+        });
       }
 
       next({
@@ -133,18 +149,10 @@ export default (parse) => {
         .subscribe(
           (result) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
-            if (action.item.id) {
-              next(Object.assign({}, action, {
-                type: `REPLACE_${entityConfig.name.toUpperCase()}`,
-                item: action.item,
-                replacement: serializeParseObject(config, entityConfig, result)
-              }));
-            } else {
-              next(Object.assign({}, action, {
-                type: `ADD_${entityConfig.name.toUpperCase()}`,
-                item: serializeParseObject(config, entityConfig, result)
-              }));
-            }
+            next(Object.assign({}, action, {
+              type: `SET_${entityConfig.name.toUpperCase()}`,
+              item: serializeParseObject(config, entityConfig, result)
+            }));
           },
           (error) => {
             console.dir(error);
@@ -158,9 +166,10 @@ export default (parse) => {
     const change = () => {
       const entityConfig = initializeEntityConfig(config, action.meta.entity);
       const updatedData = validate(entityConfig, action.item, action.meta.updatedData);
-      return next(Object.assign({}, action, {
+      return next({
+        type: `CHANGE_${action.meta.entity.toUpperCase()}_EDIT`,
         updatedData
-      }));
+      });
     };
     const addItem = () => {
       const entityConfig = initializeEntityConfig(config, action.meta.entity);

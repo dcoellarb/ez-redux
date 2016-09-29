@@ -1,11 +1,22 @@
 /// Helper functions
 const findItemIndex = (collection, item) => {
-  let index = collection.indexOf(item);
-  if (index < 0) {
-    const foundItem = collection.find(i => i.id === item.id);
-    index = collection.indexOf(foundItem);
+  const foundItem = collection.find(i => i.id === item.id);
+  return collection.indexOf(foundItem);
+};
+
+const replactItem = (stateList, item) => {
+  let list = [...stateList];
+  const index = findItemIndex(list, item);
+  if (index >= 0) {
+    list = [
+      list.slice(0, index),
+      item,
+      list.slice(index + 1)
+    ];
+  } else {
+    list = [...list, item];
   }
-  return index;
+  return list;
 };
 
 // Reducer
@@ -23,32 +34,15 @@ export default (
 
     // List reducers
     case `SET_${entity.toUpperCase()}S`: {
-      return Object.assign({}, state, {
-        list: action.items,
-        status: ''
-      });
-    }
-    case `ADD_${entity.toUpperCase()}`: {
-      return Object.assign({}, state, {
-        list: [...state.list, action.item],
-        status: ''
-      });
-    }
-    case `REPLACE_${entity.toUpperCase()}`: {
-      const index = findItemIndex(state.list, action.item);
-      if (index >= 0) {
-        return Object.assign({}, state, {
-          list: [
-            ...state.list.slice(0, index),
-            action.replacement,
-            ...state.list.slice(index + 1)
-          ],
-          status: ''
-        });
+      let list = [...state.list];
+      if (action.items) {
+        action.items.forEach((item) => { list = replactItem(list, item); });        
       }
-
+      if (action.item) {
+        list = replactItem(state.list, action.item);
+      }
       return Object.assign({}, state, {
-        list: [...state.list, action.replacement],
+        list,
         status: ''
       });
     }
