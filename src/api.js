@@ -21,7 +21,7 @@ export default (parse) => {
       return new Entity();
     },
     getAll: (params = {}) => {
-      const queryParams = Object.assign(getParams, params);
+      const queryParams = Object.assign({}, getParams, params);
       const ParseObject = Parse.Object.extend(entity);
       const query = new Parse.Query(ParseObject);
       if (queryParams.includes) {
