@@ -76,7 +76,7 @@ export default (
       const indexSubItem = findItemIndex(state.edit[action.field], action.subItem);
       const newState = Object.assign({}, state);
       newState.edit[action.field] = [
-        ...state.edit[action.field].splice(0, indexSubItem),
+        ...state.edit[action.field].slice(0, indexSubItem),
         ...state.edit[action.field].slice(indexSubItem + 1)
       ];
       return newState;
