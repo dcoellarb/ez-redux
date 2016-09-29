@@ -1,5 +1,16 @@
 import Rx from 'rxjs';
 
+const addIncludes = (query, prefix, includes) => {
+  includes.forEach(include => {
+    const includeWithPrefix = prefix ? `${prefix}.${include.field}` : include.field;
+    query.include(includeWithPrefix);
+    if (include.includes) {
+      query = addIncludes(query, includeWithPrefix, include.includes);
+    }
+  });
+  return query;
+};
+
 const getParams = { filters: [], includes: [], relations: [] };
 export default (parse) => {
   const Parse = parse;
@@ -12,9 +23,9 @@ export default (parse) => {
       const queryParams = Object.assign(getParams, params);
       const ParseObject = Parse.Object.extend(entity);
       const query = new Parse.Query(ParseObject);
-      queryParams.includes.forEach(include => {
-        query.include(include);
-      });
+      if (queryParams.includes) {
+        query = addIncludes(query, undefined, queryParams.includes);
+      }
       queryParams.filters.forEach(filter => {
         query.equalTo(filter.field, filter.value);
       });
