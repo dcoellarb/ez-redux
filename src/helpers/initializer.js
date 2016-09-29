@@ -17,7 +17,7 @@ export const initializeEntityConfig = (config, entity) => {
     return foundConfig;
   }
 
-  const entityConfig = Object.assign(defaultEntityConfig, foundConfig);
+  const entityConfig = Object.assign({}, defaultEntityConfig, foundConfig);
   entityConfig.nonStoredFields = [...entityConfig.nonStoredFields, ...ignoredFields];
   return entityConfig;
 };
