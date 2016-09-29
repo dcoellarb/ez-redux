@@ -1,14 +1,15 @@
 import Rx from 'rxjs';
 
-const addIncludes = (query, prefix, includes) => {
+const getIncludes = (prefix, includes) => {
+  let list = [];
   includes.forEach(include => {
     const includeWithPrefix = prefix ? `${prefix}.${include.field}` : include.field;
-    query.include(includeWithPrefix);
+    list.push(includeWithPrefix);
     if (include.includes) {
-      query = addIncludes(query, includeWithPrefix, include.includes);
+      list = [...list, getIncludes(includeWithPrefix, include.includes)];
     }
   });
-  return query;
+  return list;
 };
 
 const getParams = { filters: [], includes: [], relations: [] };
@@ -24,7 +25,9 @@ export default (parse) => {
       const ParseObject = Parse.Object.extend(entity);
       const query = new Parse.Query(ParseObject);
       if (queryParams.includes) {
-        query = addIncludes(query, undefined, queryParams.includes);
+        getIncludes(undefined, queryParams.includes).forEach((include) => {
+          query.include(include);
+        });
       }
       queryParams.filters.forEach(filter => {
         query.equalTo(filter.field, filter.value);
