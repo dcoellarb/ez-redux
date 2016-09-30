@@ -29,10 +29,11 @@ export default (
   switch (action.type) {
     // Status reducers
     case `SET_${entity.toUpperCase()}S_STATUS`: {
-      return Object.assign({}, state, { 
-        status: { 
+      return Object.assign({}, state, {
+        status: {
           message: action.status,
-          count: state.status.message !== '' ? state.status.count++ : state.status.count--
+          count: state.status.message !== '' ? state.status.count + 1 : state.status.count - 1
+        }
       });
     }
 
