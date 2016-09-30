@@ -20,7 +20,7 @@ const replactItem = (stateList, item) => {
 };
 
 // Reducer
-const defaultState = { list: [], edit: undefined, edits: [], status: {message: '', count: 0 };
+const defaultState = { list: [], edit: undefined, edits: [], status: { message: '', count: 0 } };
 export default (
   entity,
   state,
