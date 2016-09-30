@@ -20,7 +20,7 @@ const replactItem = (stateList, item) => {
 };
 
 // Reducer
-const defaultState = { list: [], edit: undefined, edits: [], status: '' };
+const defaultState = { list: [], edit: undefined, edits: [], status: {message: '', count: 0 };
 export default (
   entity,
   state,
@@ -29,7 +29,11 @@ export default (
   switch (action.type) {
     // Status reducers
     case `SET_${entity.toUpperCase()}S_STATUS`: {
-      return Object.assign({}, state, { status: action.status });
+      return Object.assign({}, state, { 
+        status: { 
+          message: action.status,
+          count: state.status.message !== '' ? state.status.count++ : state.status.count--
+      });
     }
 
     // List reducers
