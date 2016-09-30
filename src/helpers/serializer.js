@@ -5,8 +5,7 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
   const serializedObject = {};
   Object.keys(parseObject.attributes).map((prop) => {
     if (parseObject.attributes[prop]) {
-      if (parseObject.attributes[prop].constructor.name === 'ParseObject' ||
-        parseObject.attributes[prop].constructor.name === 'ParseObjectSubclass') {
+      if (parseObject.attributes[prop].className) {
         const subEntity = entityConfig.mapPointersToFields.find(e => e.field === prop);
         if (subEntity) {
           const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
@@ -18,12 +17,12 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
         } else {
           throw `No entity found for pointer:${prop}`;
         }
-      } else if (parseObject.attributes[prop].constructor.name === 'ParseRelation') {
+      } else if (parseObject.attributes[prop].targetClassName) {
         serializedObject[prop] = {
           relation: parseObject.attributes[prop],
           relations: []
         };
-      } else if (parseObject.attributes[prop].constructor.name === 'ParseGeoPoint') {
+      } else if (parseObject.attributes[prop].latitude && parseObject.attributes[prop].longitude) {
         serializedObject[prop] = {
           latitude: parseObject.attributes[prop].latitude,
           longitude: parseObject.attributes[prop].longitude
