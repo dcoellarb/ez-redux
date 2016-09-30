@@ -42,8 +42,7 @@ export default (
         list = replactItem(state.list, action.item);
       }
       return Object.assign({}, state, {
-        list,
-        status: ''
+        list
       });
     }
     case `REMOVE_${entity.toUpperCase()}`: {

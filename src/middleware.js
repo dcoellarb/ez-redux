@@ -19,12 +19,17 @@ export default (parse) => {
       return next(action);
     }
 
-    // List actions
-    const getAll = () => {
+    // status actions
+    const setStatus = (status) => {
       next({
         type: `SET_${action.meta.entity.toUpperCase()}S_STATUS`,
-        status: 'loadingList'
+        status
       });
+    };
+
+    // List actions
+    const getAll = () => {
+      setStatus('loadingList');
       const suscription = api(action.meta.entity)
         .getAll(action.meta.params)
         .subscribe(
@@ -45,7 +50,7 @@ export default (parse) => {
               [
                 ...params.includes.map((i) => i.field),
                 ...params.relations.map((r) => r.field)
-              ].forEach(include => {
+              ].forEach((include, index, array) => {
                 let isPointer = false;
                 let isArrayObject = false;
                 let isRelation = false;
@@ -102,9 +107,17 @@ export default (parse) => {
                               type: `SET_${subEntity.entity.toUpperCase()}S`,
                               items: serializedSubitems
                             });
+                            
+                            if (index === array.length - 1) {
+                              setStatus('');
+                            }
                           },
                           (error) => {
                             console.dir(error);
+
+                            if (index === array.length - 1) {
+                              setStatus('');
+                            }
                           },
                           () => {}
                         );
@@ -112,10 +125,16 @@ export default (parse) => {
                   });
                 }
               });
+              if (!action.meta.params.relations || action.meta.params.relations.length === 0) {
+                setStatus('');
+              }
+            } else {
+              setStatus('');
             }
           },
           (error) => {
             console.dir(error);
+            setStatus('');
           },
           () => {}
         );
@@ -123,10 +142,7 @@ export default (parse) => {
       return suscription;
     };
     const getRelation = () => {
-      next({
-        type: `SET_${action.meta.entity.toUpperCase()}S_STATUS`,
-        status: 'loadingRelation'
-      });
+      setStatus('loadingRelation');
       const suscription = api(action.meta.entity)
         .getRelation(action.item.object, action.meta.relation)
         .subscribe(
@@ -152,15 +168,20 @@ export default (parse) => {
                   type: `SET_${subEntity.entity.toUpperCase()}S`,
                   items: serializedRelated
                 });
+
+                setStatus('');
               } else {
                 throw `No entity config found for relation:${action.meta.relation}`;
+                setStatus('');
               }
             } else {
               throw `No entity config found for relation:${action.meta.relation}`;
+              setStatus('');
             }
           },
           (error) => {
             console.dir(error);
+            setStatus('');
           },
           () => {}
         );
@@ -177,10 +198,7 @@ export default (parse) => {
         });
       }
 
-      next({
-        type: `SET_${action.meta.entity.toUpperCase()}S_STATUS`,
-        status: 'saving'
-      });
+      setStatus('saving');
       const deserializedObject = deserializeParseObject(
         config,
         entityConfig,
@@ -195,9 +213,11 @@ export default (parse) => {
               type: `SET_${entityConfig.name.toUpperCase()}S`,
               item: serializeParseObject(config, entityConfig, result)
             }));
+            setStatus('');
           },
           (error) => {
             console.dir(error);
+            setStatus('');
           },
           () => {}
         );
