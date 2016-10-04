@@ -72,7 +72,7 @@ export default (parse) => {
                 }
 
                 if (isPointer || isArrayObject || isRelation) {
-                  serializedItems.forEach((item) => {
+                  serializedItems.forEach((item, i, a) => {
                     if (isPointer) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
@@ -108,14 +108,14 @@ export default (parse) => {
                               items: serializedSubitems
                             });
                             
-                            if (index === array.length - 1) {
+                            if (index === array.length - 1 && i === a.length - 1) {
                               setStatus('');
                             }
                           },
                           (error) => {
                             console.dir(error);
 
-                            if (index === array.length - 1) {
+                            if (index === array.length - 1 && i === a.length - 1) {
                               setStatus('');
                             }
                           },
