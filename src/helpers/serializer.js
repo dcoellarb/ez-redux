@@ -69,7 +69,7 @@ export const deserializeParseObject = (config, entityConfig, serializedObject, p
       } else if (serializedObject[prop].latitude || serializedObject[prop].longitude) {
         serializedObject.object.set(prop, new parse.GeoPoint(serializedObject[prop].latitude, serializedObject[prop].longitude));
       } else if (serializedObject[prop].relation) {
-        serializedObject.object.set(prop, serializedObject[prop].relation);
+        // Do nothing as relations are never updated this way.
       } else if (serializedObject[prop] instanceof Array) {
         const subEntity = entityConfig.mapArraysToFields.find(e => e.field === prop);
         if (subEntity) {
