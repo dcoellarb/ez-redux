@@ -276,7 +276,8 @@ export default (parse) => {
           (result) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
 
-            const index = action.item[action.meta.relation].relations.find(r => r.id === action.meta.relatedItem.id);
+            const currentItem = action.item[action.meta.relation].relations.find(r => r.id === action.meta.relatedItem.id);
+            const index = action.item[action.meta.relation].relations.indexOf(currentItem);
             const updatedItem = serializeParseObject(config, entityConfig, result);
             updatedItem[action.meta.relation].relations = [
               ...action.item[action.meta.relation].relations.slice(0, index),
