@@ -160,7 +160,7 @@ export default (parse) => {
                 });
                 next({
                   type: `SET_${action.meta.entity.toUpperCase()}S`,
-                  item: updateSerializedObject(config, entityConfig, action.item, updatedData)
+                  item: updateSerializedObject(config, entityConfig, action.item, updatedData, parse)
                 });
 
                 // Update pointer in their reducer
@@ -202,7 +202,8 @@ export default (parse) => {
       const deserializedObject = deserializeParseObject(
         config,
         entityConfig,
-        action.item
+        action.item,
+        parse
       );
       const subscriber = api(entityConfig.name)
         .save(deserializedObject)

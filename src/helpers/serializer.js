@@ -56,9 +56,9 @@ export const serializeParseObject = (config, entityConfig, parseObject) => {
   return serializedObject;
 };
 
-export const deserializeParseObject = (config, entityConfig, serializedObject) => { 
+export const deserializeParseObject = (config, entityConfig, serializedObject, parse) => { 
   if (!serializedObject.object) {
-    serializedObject.object = apiEnvChooser(entityConfig.parse)(entityConfig.name).create();
+    serializedObject.object = apiEnvChooser(parse)(entityConfig.name).create();
   }
   Object.keys(serializedObject).map((prop) => {
     if (entityConfig.nonStoredFields.indexOf(prop) === -1) {
@@ -67,7 +67,7 @@ export const deserializeParseObject = (config, entityConfig, serializedObject) =
       } else if (serializedObject[prop].object) {
         serializedObject.object.set(prop, serializedObject[prop].object);
       } else if (serializedObject[prop].latitude || serializedObject[prop].longitude) {
-        serializedObject.object.set(prop, new entityConfig.parse.GeoPoint(serializedObject[prop].latitude, serializedObject[prop].longitude));
+        serializedObject.object.set(prop, new parse.GeoPoint(serializedObject[prop].latitude, serializedObject[prop].longitude));
       } else if (serializedObject[prop].relation) {
         serializedObject.object.set(prop, serializedObject[prop].relation);
       } else if (serializedObject[prop] instanceof Array) {
@@ -93,10 +93,10 @@ export const deserializeParseObject = (config, entityConfig, serializedObject) =
   });
   return serializedObject.object;
 };
-export const updateSerializedObject = (config, entityConfig, serializedObject, updates) => {
+export const updateSerializedObject = (config, entityConfig, serializedObject, updates, parse) => {
   const newObject = Object.assign({}, serializedObject, updates);
   if (newObject.object) {
-    newObject.object = deserializeParseObject(config, entityConfig, newObject);
+    newObject.object = deserializeParseObject(config, entityConfig, newObject, parse);
     serializedObject.object = undefined;
   }
   return newObject;
