@@ -224,6 +224,70 @@ export default (parse) => {
         );
       return subscriber;
     };
+    const addRelation = () => {
+      let entityConfig = initializeEntityConfig(config, action.meta.entity);
+
+      const relation = action.item.object.relation(action.meta.relation);
+      relation.add(action.meta.relatedItem.object);
+
+      setStatus('saving');
+      const subscriber = api(entityConfig.name)
+        .save(action.item.object)
+        .subscribe(
+          (result) => {
+            entityConfig = initializeEntityConfig(config, action.meta.entity);
+
+            const updatedItem = serializeParseObject(config, entityConfig, result);
+            updatedItem[action.meta.relation].relations = [...action.item[action.meta.relation].relations, action.meta.relatedItem];
+
+            next(Object.assign({}, action, {
+              type: `SET_${entityConfig.name.toUpperCase()}S`,
+              item: updatedItem
+            }));
+            setStatus('');
+          },
+          (error) => {
+            console.dir(error);
+            setStatus('');
+          },
+          () => {}
+        );
+      return subscriber;
+    };
+    const removeRelation = () => {
+      let entityConfig = initializeEntityConfig(config, action.meta.entity);
+
+      const relation = action.item.object.relation(action.meta.relation);
+      relation.remove(action.meta.relatedItem.object);
+
+      setStatus('saving');
+      const subscriber = api(entityConfig.name)
+        .save(action.item.object)
+        .subscribe(
+          (result) => {
+            entityConfig = initializeEntityConfig(config, action.meta.entity);
+
+            const index = action.item[action.meta.relation].relations.find(r => r.id === action.meta.relatedItem.id);
+            const updatedItem = serializeParseObject(config, entityConfig, result);
+            updatedItem[action.meta.relation].relations = [
+              ...action.item[action.meta.relation].relations.slice(0, index),
+              ...action.item[action.meta.relation].relations.slice(index + 1)
+            ];
+
+            next(Object.assign({}, action, {
+              type: `SET_${entityConfig.name.toUpperCase()}S`,
+              item: updatedItem
+            }));
+            setStatus('');
+          },
+          (error) => {
+            console.dir(error);
+            setStatus('');
+          },
+          () => {}
+        );
+      return subscriber;
+    };
 
     // Edit actions
     const change = () => {
@@ -310,6 +374,12 @@ export default (parse) => {
       }
       case 'save': {
         return save();
+      }
+      case 'addRelation': {
+        return addRelation();
+      }
+      case 'removeRelation': {
+        return removeRelation();
       }
       case 'change': {
         return change();

@@ -16,6 +16,16 @@ export default (entity) => {
       meta: { entity, action: 'save' },
       item
     }),
+    addRelation: (item, relatedItem) => ({
+      type: `SAVE_${entity.toUpperCase()}`,
+      meta: { entity, action: 'addRelation', relatedItem },
+      item
+    }),
+    removeRelation: (item, relatedItem) => ({
+      type: `SAVE_${entity.toUpperCase()}`,
+      meta: { entity, action: 'removeRelation', relatedItem },
+      item
+    }),
     delete: (item) => ({
       type: `REMOVE_${entity.toUpperCase()}`,
       item
