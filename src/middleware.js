@@ -210,9 +210,18 @@ export default (parse) => {
         .subscribe(
           (result) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
+            const updatedItem = serializeParseObject(config, entityConfig, result);
+
+            // Maintain exiting relations
+            if (entityConfig.mapRealtionsToFields) {
+              entityConfig.mapRealtionsToFields.forEach(r => {
+                updatedItem[r.field].relations = action.item[r.field].relations;
+              });
+            }
+
             next(Object.assign({}, action, {
               type: `SET_${entityConfig.name.toUpperCase()}S`,
-              item: serializeParseObject(config, entityConfig, result)
+              item: updatedItem
             }));
             setStatus('');
           },
