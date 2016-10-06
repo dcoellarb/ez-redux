@@ -10,7 +10,7 @@ const replactItem = (stateList, item) => {
   if (index >= 0) {
     list = [
       ...list.slice(0, index),
-      Object.assign({}, list[index], item),
+      item, // This code did not work for unseting props: Object.assign({}, list[index], item),
       ...list.slice(index + 1)
     ];
   } else {
