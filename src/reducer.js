@@ -30,7 +30,7 @@ export default (
     // Status reducers
     case `SET_${entity.toUpperCase()}S_STATUS`: {
       let message = action.status;
-      if (state.status.message !== '' && action.status === '') {
+      if (state.status.count > 1 && state.status.message !== '' && action.status === '') {
         message = state.status.message;
       }
       return Object.assign({}, state, {

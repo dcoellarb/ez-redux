@@ -3,7 +3,7 @@ const defaultEntityConfig = {
   name: '',
   mapArraysToFields: [],
   mapPointersToFields: [],
-  mapRealtionsToFields: [],
+  mapRelationsToFields: [],
   nonStoredFields: [],
   validate: () => ({
     errors: [],

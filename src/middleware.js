@@ -45,7 +45,7 @@ export default (parse) => {
             });
 
             // Update pointer in their reducers
-            if (action.meta.params && (action.meta.params.includes || action.meta.params.relations)) {
+            if (items.length > 0 && action.meta.params && (action.meta.params.includes || action.meta.params.relations)) {
               const params = Object.assign({}, { includes: [], relations: [] }, action.meta.params);
               [
                 ...params.includes.map((i) => i.field),
@@ -63,7 +63,7 @@ export default (parse) => {
                   if (subEntity) {
                     isArrayObject = true;
                   } else {
-                    subEntity = entityConfig.mapRealtionsToFields.find(e => e.field === include);
+                    subEntity = entityConfig.mapRelationsToFields.find(e => e.field === include);
                     if (subEntity) {
                       subEntityConfig = initializeEntityConfig(config, subEntity.entity);
                       isRelation = true;
@@ -88,8 +88,8 @@ export default (parse) => {
                         .getRelation(item.object, include)
                         .subscribe(
                           (subItems) => {
-                            const serializedSubitems = subItems.map((i) =>
-                              serializeParseObject(config, subEntityConfig, i)
+                            const serializedSubitems = subItems.map((subItem) =>
+                              serializeParseObject(config, subEntityConfig, subItem)
                             );
 
                             // Update item with relations
@@ -123,6 +123,9 @@ export default (parse) => {
                         );
                     }
                   });
+                } else {
+                  console.log(`error: ${include} could not be determined.`);
+                  setStatus('');
                 }
               });
               if (!action.meta.params.relations || action.meta.params.relations.length === 0) {
