@@ -98,7 +98,7 @@ export default (parse) => {
                         item: item[include]
                       });
                       const paramInclude = action.meta.params.includes.find(pi => pi.field === include);
-                      if (paramInclude && paramInclude.includes && paramInclude.length > 0) {
+                      if (paramInclude && paramInclude.includes && paramInclude.includes.length > 0) {
                         setInnerPointers(subEntity.entity, paramInclude.includes, item[include]);
                       }
                     } else if (isArrayObject) {
