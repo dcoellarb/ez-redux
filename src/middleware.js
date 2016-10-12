@@ -29,7 +29,9 @@ export default (parse) => {
             type: `SET_${subEntity.entity.toUpperCase()}S`,
             item: item[include.field]
           });
-          setInnerPointers(subEntity.entity, include.includes, item[include.field]);
+          if (include.includes && include.includes.length > 0) {
+            setInnerPointers(subEntity.entity, include.includes, item[include.field]);
+          }
         } else {
           console.log(`error mapPointToField not found for: ${include.field} in ${entity}`);
         }
@@ -95,7 +97,10 @@ export default (parse) => {
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
                         item: item[include]
                       });
-                      setInnerPointers(subEntity.entity, action.meta.params.includes.find(paramInclude => paramInclude.field === include).includes, item[include]);
+                      const paramInclude = action.meta.params.includes.find(pi => pi.field === include);
+                      if (paramInclude && paramInclude.includes && paramInclude.length > 0) {
+                        setInnerPointers(subEntity.entity, paramInclude.includes, item[include]);
+                      }
                     } else if (isArrayObject) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
