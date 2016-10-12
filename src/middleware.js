@@ -19,6 +19,23 @@ export default (parse) => {
       return next(action);
     }
 
+    // Set nested includes pointers
+    const setInnerPointers = (entity, includes, item) => {
+      const entityConfig = initializeEntityConfig(config, entity);
+      includes.forEach((include) => {
+        const subEntity = entityConfig.mapPointersToFields.find(e => e.field === include.field);
+        if (subEntity) {
+          next({
+            type: `SET_${subEntity.entity.toUpperCase()}S`,
+            item: item[include.field]
+          });
+          setInnerPointers(subEntity.entity, include.includes, item[include.field]);
+        } else {
+          console.log(`error mapPointToField not found for: ${include.field} in ${entity}`);
+        }
+      });
+    };
+
     // status actions
     const setStatus = (status) => {
       next({
@@ -78,6 +95,7 @@ export default (parse) => {
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
                         item: item[include]
                       });
+                      setInnerPointers(subEntity.entity, action.meta.params.includes.find(paramInclude => paramInclude.field === include).includes, item[include]);
                     } else if (isArrayObject) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
