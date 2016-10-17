@@ -243,6 +243,10 @@ export default (parse) => {
               entityConfig.mapRelationsToFields.forEach(r => {
                 if (updatedItem[r.field]) {
                   updatedItem[r.field].relations = action.item[r.field].relations;                  
+                } else {
+                  updatedItem[r.field] = {
+                    relations: []
+                  };
                 }
               });
             }
