@@ -174,7 +174,7 @@ export default (parse) => {
         .subscribe(
           (related) => {
             const entityConfig = initializeEntityConfig(config, action.meta.entity);
-            const subEntity = entityConfig.mapRealtionsToFields.find(e => e.field === action.meta.relation);
+            const subEntity = entityConfig.mapRelationsToFields.find(e => e.field === action.meta.relation);
             if (subEntity) {
               const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
               if (subEntityConfig) {
@@ -239,8 +239,8 @@ export default (parse) => {
             const updatedItem = serializeParseObject(config, entityConfig, result);
 
             // Maintain exiting relations
-            if (entityConfig.mapRealtionsToFields) {
-              entityConfig.mapRealtionsToFields.forEach(r => {
+            if (entityConfig.mapRelationsToFields) {
+              entityConfig.mapRelationsToFields.forEach(r => {
                 updatedItem[r.field].relations = action.item[r.field].relations;
               });
             }
