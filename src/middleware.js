@@ -241,7 +241,9 @@ export default (parse) => {
             // Maintain exiting relations
             if (entityConfig.mapRelationsToFields) {
               entityConfig.mapRelationsToFields.forEach(r => {
-                updatedItem[r.field].relations = action.item[r.field].relations;
+                if (updatedItem[r.field]) {
+                  updatedItem[r.field].relations = action.item[r.field].relations;                  
+                }
               });
             }
 
