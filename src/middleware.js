@@ -1,3 +1,4 @@
+import Rx from 'rxjs';
 import apiEnvChooser from './api';
 import validate from './helpers/validator';
 import { initializeEntityConfig } from './helpers/initializer';
@@ -47,10 +48,10 @@ export default (parse) => {
     };
 
     // List actions
-    const getAll = () => {
+    const getAll = (observer) => {
       setStatus('loadingList');
-      const suscription = api(action.meta.entity)
-        .getAll(action.meta.params)
+      api(action.meta.entity)
+        .getAll(action.meta.params)   // Get all api
         .subscribe(
           (items) => {
             const entityConfig = initializeEntityConfig(config, action.meta.entity);
@@ -133,39 +134,44 @@ export default (parse) => {
                             
                             if (index === array.length - 1 && i === a.length - 1) {
                               setStatus('');
+                              observer.onNext();
+                              observer.onComplete();
                             }
                           },
                           (error) => {
                             console.dir(error);
-
-                            if (index === array.length - 1 && i === a.length - 1) {
-                              setStatus('');
-                            }
+                            setStatus('');
+                            observer.onError(error);
                           },
                           () => {}
                         );
                     }
                   });
                 } else {
-                  console.log(`error: ${include} could not be determined.`);
                   setStatus('');
+                  observer.onNext();
+                  observer.onComplete();
                 }
               });
               if (!action.meta.params.relations || action.meta.params.relations.length === 0) {
                 setStatus('');
+                observer.onNext();
+                observer.onComplete();
               }
             } else {
               setStatus('');
+              observer.onNext();
+              observer.onComplete();
             }
           },
           (error) => {
-            console.dir(error);
             setStatus('');
+            observer.onError(error);
           },
           () => {}
         );
 
-      return suscription;
+      // return suscription;
     };
     const getRelation = () => {
       setStatus('loadingRelation');
@@ -409,7 +415,7 @@ export default (parse) => {
 
     switch (action.meta.action) {
       case 'getAll': {
-        return getAll();
+        return Rx.Observable.create(observer => getAll(observer));
       }
       case 'getRelation': {
         return getRelation();
