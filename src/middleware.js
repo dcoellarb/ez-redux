@@ -202,7 +202,7 @@ export default (parse) => {
                 });
 
                 setStatus('');
-                observer.next();
+                observer.next(serializedRelated);
                 observer.complete();
               } else {
                 setStatus('');
@@ -265,7 +265,7 @@ export default (parse) => {
               item: updatedItem
             }));
             setStatus('');
-            observer.next();
+            observer.next(updatedItem);
             observer.complete();
           },
           (error) => {
@@ -297,7 +297,7 @@ export default (parse) => {
               item: updatedItem
             }));
             setStatus('');
-            observer.next();
+            observer.next(updatedItem);
             observer.complete();
           },
           (error) => {
@@ -335,7 +335,7 @@ export default (parse) => {
               item: updatedItem
             }));
             setStatus('');
-            observer.next();
+            observer.next(updatedItem);
             observer.complete();
           },
           (error) => {
@@ -355,7 +355,7 @@ export default (parse) => {
         type: `CHANGE_${action.meta.entity.toUpperCase()}_EDIT`,
         updatedData
       });
-      observer.next();
+      observer.next(updatedData);
       observer.complete();
     };
     const addItem = (observer) => {
@@ -371,7 +371,7 @@ export default (parse) => {
               field: action.meta.field,
               updatedData
             }));
-            observer.next();
+            observer.next(updatedData);
             observer.complete();
           } else {
             next(Object.assign({}, action, {
@@ -392,7 +392,7 @@ export default (parse) => {
             field: action.meta.field,
             updatedData
           }));
-          observer.next();
+          observer.next(updatedData);
           observer.complete();
         } else {
           next(Object.assign({}, action, {
@@ -418,7 +418,7 @@ export default (parse) => {
             field: action.meta.field,
             updatedData
           }));
-          observer.next();
+          observer.next(updatedData);
           observer.complete();
         } else {
           observer.error({ message: `Missing entity configuration for: ${subEntity.entity}` });
@@ -430,14 +430,14 @@ export default (parse) => {
             field: action.meta.field,
             updatedData
           }));
-          observer.next();
+          observer.next(updatedData);
           observer.complete();
         } else {
           next(Object.assign({}, action, {
             field: action.meta.field,
             updatedData
           }));
-          observer.next();
+          observer.next(updatedData);
           observer.complete();
         }
       }
