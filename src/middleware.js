@@ -134,8 +134,8 @@ export default (parse) => {
                             
                             if (index === array.length - 1 && i === a.length - 1) {
                               setStatus('');
-                              observer.onNext();
-                              observer.onComplete();
+                              observer.next();
+                              observer.complete();
                             }
                           },
                           (error) => {
@@ -149,19 +149,19 @@ export default (parse) => {
                   });
                 } else {
                   setStatus('');
-                  observer.onNext();
-                  observer.onComplete();
+                  observer.next();
+                  observer.complete();
                 }
               });
               if (!action.meta.params.relations || action.meta.params.relations.length === 0) {
                 setStatus('');
-                observer.onNext();
-                observer.onComplete();
+                observer.next();
+                observer.complete();
               }
             } else {
               setStatus('');
-              observer.onNext();
-              observer.onComplete();
+              observer.next();
+              observer.complete();
             }
           },
           (error) => {
@@ -173,7 +173,7 @@ export default (parse) => {
 
       // return suscription;
     };
-    const getRelation = () => {
+    const getRelation = (observer) => {
       setStatus('loadingRelation');
       const suscription = api(action.meta.entity)
         .getRelation(action.item.object, action.meta.relation)
@@ -202,25 +202,28 @@ export default (parse) => {
                 });
 
                 setStatus('');
+                observer.next();
+                observer.complete();
               } else {
-                throw `No entity config found for relation:${action.meta.relation}`;
                 setStatus('');
+                observer.error({message: `No entity config found for relation:${action.meta.relation}`});
               }
             } else {
-              throw `No entity config found for relation:${action.meta.relation}`;
               setStatus('');
+              observer.error({message: `No entity config found for relation:${action.meta.relation}`});
             }
           },
           (error) => {
             console.dir(error);
             setStatus('');
+            observer.error(error);
           },
           () => {}
         );
 
       return suscription;
     };
-    const save = () => {
+    const save = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
       const updatedData = validate(entityConfig, action.item);
       if (updatedData && updatedData.errors.length > 0) {
@@ -262,16 +265,18 @@ export default (parse) => {
               item: updatedItem
             }));
             setStatus('');
+            observer.next();
+            observer.complete();
           },
           (error) => {
-            console.dir(error);
             setStatus('');
+            observer.error(error);
           },
           () => {}
         );
       return subscriber;
     };
-    const addRelation = () => {
+    const addRelation = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
 
       const relation = action.item.object.relation(action.meta.relation);
@@ -292,16 +297,19 @@ export default (parse) => {
               item: updatedItem
             }));
             setStatus('');
+            observer.next();
+            observer.complete();
           },
           (error) => {
             console.dir(error);
             setStatus('');
+            observer.error(error);
           },
           () => {}
         );
       return subscriber;
     };
-    const removeRelation = () => {
+    const removeRelation = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
 
       const relation = action.item.object.relation(action.meta.relation);
@@ -327,10 +335,12 @@ export default (parse) => {
               item: updatedItem
             }));
             setStatus('');
+            observer.next();
+            observer.complete();
           },
           (error) => {
-            console.dir(error);
             setStatus('');
+            observer.error(error);
           },
           () => {}
         );
@@ -338,15 +348,17 @@ export default (parse) => {
     };
 
     // Edit actions
-    const change = () => {
+    const change = (observer) => {
       const entityConfig = initializeEntityConfig(config, action.meta.entity);
       const updatedData = validate(entityConfig, action.item, action.meta.updatedData);
-      return next({
+      next({
         type: `CHANGE_${action.meta.entity.toUpperCase()}_EDIT`,
         updatedData
       });
+      observer.next();
+      observer.complete();
     };
-    const addItem = () => {
+    const addItem = (observer) => {
       const entityConfig = initializeEntityConfig(config, action.meta.entity);
       const subEntity = entityConfig.mapArraysToFields.find(e => e.field === action.meta.field);
       if (subEntity) {
@@ -354,37 +366,47 @@ export default (parse) => {
         if (subEntityConfig) {
           const updatedData = validate(subEntityConfig, action.subItem);
           if (updatedData && updatedData.errors.length > 0) {
-            return next(Object.assign({}, action, {
+            next(Object.assign({}, action, {
               type: `CHANGE_${entityConfig.name.toUpperCase()}_ITEM`,
               field: action.meta.field,
               updatedData
             }));
+            observer.next();
+            observer.complete();
+          } else {
+            next(Object.assign({}, action, {
+              type: `ADD_${entityConfig.name.toUpperCase()}_ITEM`,
+              field: action.meta.field
+            }));
+            observer.next();
+            observer.complete();
           }
-
-          return next(Object.assign({}, action, {
+        } else {
+          observer.error({ message: `Missing entity configuration for: ${subEntity.entity}` });
+        }
+      } else {
+        const updatedData = validate(entityConfig, action.subItem);
+        if (updatedData && updatedData.errors.length > 0) {
+          next(Object.assign({}, action, {
+            type: `CHANGE_${entityConfig.name.toUpperCase()}_ITEM`,
+            field: action.meta.field,
+            updatedData
+          }));
+          observer.next();
+          observer.complete();
+        } else {
+          next(Object.assign({}, action, {
             type: `ADD_${entityConfig.name.toUpperCase()}_ITEM`,
             field: action.meta.field
           }));
+          observer.next();
+          observer.complete();
         }
-        throw `Missing entity configuration for: ${subEntity.entity}`;
       }
-
-      const updatedData = validate(entityConfig, action.subItem);
-      if (updatedData && updatedData.errors.length > 0) {
-        return next(Object.assign({}, action, {
-          type: `CHANGE_${entityConfig.name.toUpperCase()}_ITEM`,
-          field: action.meta.field,
-          updatedData
-        }));
-      }
-      return next(Object.assign({}, action, {
-        type: `ADD_${entityConfig.name.toUpperCase()}_ITEM`,
-        field: action.meta.field
-      }));
     };
 
     // Edits actions
-    const changeItem = () => {
+    const changeItem = (observer) => {
       const entityConfig = initializeEntityConfig(config, action.meta.entity);
       let updatedData = action.meta.updatedData;
       const subEntity = entityConfig.mapArraysToFields.find(e => e.field === action.meta.field);
@@ -392,25 +414,33 @@ export default (parse) => {
         const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
         if (subEntityConfig) {
           updatedData = validate(subEntityConfig, action.subItem, action.meta.updatedData);
-          return next(Object.assign({}, action, {
+          next(Object.assign({}, action, {
             field: action.meta.field,
             updatedData
           }));
+          observer.next();
+          observer.complete();
+        } else {
+          observer.error({ message: `Missing entity configuration for: ${subEntity.entity}` });
         }
-        throw `Missing entity configuration for: ${subEntity.entity}`;
+      } else {
+        updatedData = validate(entityConfig, action.subItem, action.meta.updatedData);
+        if (updatedData && updatedData.errors.length > 0) {
+          next(Object.assign({}, action, {
+            field: action.meta.field,
+            updatedData
+          }));
+          observer.next();
+          observer.complete();
+        } else {
+          next(Object.assign({}, action, {
+            field: action.meta.field,
+            updatedData
+          }));
+          observer.next();
+          observer.complete();
+        }
       }
-
-      updatedData = validate(entityConfig, action.subItem, action.meta.updatedData);
-      if (updatedData && updatedData.errors.length > 0) {
-        return next(Object.assign({}, action, {
-          field: action.meta.field,
-          updatedData
-        }));
-      }
-      return next(Object.assign({}, action, {
-        field: action.meta.field,
-        updatedData
-      }));
     };
 
     switch (action.meta.action) {
@@ -418,25 +448,25 @@ export default (parse) => {
         return Rx.Observable.create(observer => getAll(observer));
       }
       case 'getRelation': {
-        return getRelation();
+        return Rx.Observable.create(observer => getRelation(observer));
       }
       case 'save': {
-        return save();
+        return Rx.Observable.create(observer => save(observer));
       }
       case 'addRelation': {
-        return addRelation();
+        return Rx.Observable.create(observer => addRelation(observer));
       }
       case 'removeRelation': {
-        return removeRelation();
+        return Rx.Observable.create(observer => removeRelation(observer));
       }
       case 'change': {
-        return change();
+        return Rx.Observable.create(observer => change(observer));
       }
       case 'addItem': {
-        return addItem();
+        return Rx.Observable.create(observer => addItem(observer));
       }
       case 'changeItem': {
-        return changeItem();
+        return Rx.Observable.create(observer => changeItem(observer));
       }
       default: {
         return next(action);
