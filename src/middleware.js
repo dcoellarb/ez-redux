@@ -134,14 +134,14 @@ export default (parse) => {
                             
                             if (index === array.length - 1 && i === a.length - 1) {
                               setStatus('');
-                              observer.next();
+                              observer.next(serializedItems);
                               observer.complete();
                             }
                           },
                           (error) => {
                             console.dir(error);
                             setStatus('');
-                            observer.onError(error);
+                            observer.error(error);
                           },
                           () => {}
                         );
@@ -149,24 +149,24 @@ export default (parse) => {
                   });
                 } else {
                   setStatus('');
-                  observer.next();
+                  observer.next(serializedItems);
                   observer.complete();
                 }
               });
               if (!action.meta.params.relations || action.meta.params.relations.length === 0) {
                 setStatus('');
-                observer.next();
+                observer.next(serializedItems);
                 observer.complete();
               }
             } else {
               setStatus('');
-              observer.next();
+              observer.next(serializedItems);
               observer.complete();
             }
           },
           (error) => {
             setStatus('');
-            observer.onError(error);
+            observer.error(error);
           },
           () => {}
         );
