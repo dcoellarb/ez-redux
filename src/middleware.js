@@ -67,23 +67,20 @@ export default (parse) => {
             // Update pointer in their reducers
             if (items.length > 0 && action.meta.params && (action.meta.params.includes || action.meta.params.relations)) {
               const params = Object.assign({}, { includes: [], relations: [] }, action.meta.params);
-              [
-                ...params.includes.map((i) => i.field),
-                ...params.relations.map((r) => r.field)
-              ].forEach((include, index, array) => {
+              params.forEach((include, index, array) => {
                 let isPointer = false;
                 let isArrayObject = false;
                 let isRelation = false;
-                let subEntity = entityConfig.mapPointersToFields.find(e => e.field === include);
+                let subEntity = entityConfig.mapPointersToFields.find(e => e.field === include.field);
                 let subEntityConfig;
                 if (subEntity) {
                   isPointer = true;
                 } else {
-                  subEntity = entityConfig.mapArraysToFields.find(e => e.field === include);
+                  subEntity = entityConfig.mapArraysToFields.find(e => e.field === include.field);
                   if (subEntity) {
                     isArrayObject = true;
                   } else {
-                    subEntity = entityConfig.mapRelationsToFields.find(e => e.field === include);
+                    subEntity = entityConfig.mapRelationsToFields.find(e => e.field === include.field);
                     if (subEntity) {
                       subEntityConfig = initializeEntityConfig(config, subEntity.entity);
                       isRelation = true;
@@ -96,7 +93,7 @@ export default (parse) => {
                     if (isPointer) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
-                        item: item[include]
+                        item: item[include.field]
                       });
                       const paramInclude = action.meta.params.includes.find(pi => pi.field === include);
                       if (paramInclude && paramInclude.includes && paramInclude.includes.length > 0) {
@@ -105,11 +102,11 @@ export default (parse) => {
                     } else if (isArrayObject) {
                       next({
                         type: `SET_${subEntity.entity.toUpperCase()}S`,
-                        items: item[include]
+                        items: item[include.field]
                       });
                     } else {
                       api(action.meta.entity)
-                        .getRelation(item.object, include, { includes: include.includes })
+                        .getRelation(item.object, include.field, { includes: include.includes })
                         .subscribe(
                           (subItems) => {
                             const serializedSubitems = subItems.map((subItem) =>
@@ -118,7 +115,7 @@ export default (parse) => {
 
                             // Update item with relations
                             const updatedItem = Object.assign({}, item);
-                            updatedItem[include] = Object.assign({}, updatedItem[include], {
+                            updatedItem[include.field] = Object.assign({}, updatedItem[include.field], {
                               relations: serializedSubitems
                             });
                             next({
