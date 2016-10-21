@@ -24,7 +24,7 @@ export default (parse) => {
       const queryParams = Object.assign({}, getParams, params);
       const ParseObject = Parse.Object.extend(entity);
       const query = new Parse.Query(ParseObject);
-      if (queryParams.includes) {
+      if (queryParams.includes.length > 0) {
         getIncludes(undefined, queryParams.includes).forEach((include) => {
           query.include(include);
         });
@@ -38,14 +38,22 @@ export default (parse) => {
       const queryParams = Object.assign({}, getParams, params);
       const ParseObject = Parse.Object.extend(entity);
       const query = new Parse.Query(ParseObject);
-      queryParams.includes.forEach(include => {
-        query.include(include);
-      });
+      if (queryParams.include.length > 0) {
+        getIncludes(undefined, queryParams.includes).forEach((include) => {
+          query.include(include);
+        });
+      }
       return Rx.Observable.fromPromise(query.get(id));
     },
-    getRelation: (parseObject, field) => {
+    getRelation: (parseObject, field, params) => {
       const relation = parseObject.relation(field);
       const query = relation.query();
+      const queryParams = Object.assign({}, getParams, params);
+      if (queryParams.includes.length > 0) {
+        getIncludes(undefined, queryParams.includes).forEach((include) => {
+          query.include(include);
+        });
+      }
       return Rx.Observable.fromPromise(query.find());
     },
     save: (parseObject) => Rx.Observable.fromPromise(parseObject.save())

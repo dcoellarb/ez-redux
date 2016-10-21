@@ -109,7 +109,7 @@ export default (parse) => {
                       });
                     } else {
                       api(action.meta.entity)
-                        .getRelation(item.object, include)
+                        .getRelation(item.object, include, { includes: include.includes })
                         .subscribe(
                           (subItems) => {
                             const serializedSubitems = subItems.map((subItem) =>
@@ -176,7 +176,7 @@ export default (parse) => {
     const getRelation = (observer) => {
       setStatus('loadingRelation');
       const suscription = api(action.meta.entity)
-        .getRelation(action.item.object, action.meta.relation)
+        .getRelation(action.item.object, action.meta.relation, action.meta.params)
         .subscribe(
           (related) => {
             const entityConfig = initializeEntityConfig(config, action.meta.entity);

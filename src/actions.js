@@ -6,9 +6,9 @@ export default (entity) => {
       meta: { entity, action: 'getAll', params },
       items: []
     }),
-    getRelation: (item, relation) => ({
+    getRelation: (item, relation, params) => ({
       type: `GET_${entity.toUpperCase()}_RELATION`,
-      meta: { entity, action: 'getRelation', relation },
+      meta: { entity, action: 'getRelation', relation, params },
       item
     }),
     save: (item) => ({
