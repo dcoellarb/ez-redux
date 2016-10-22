@@ -15,54 +15,47 @@ const getIncludes = (prefix, includes) => {
 const getParams = { filters: [], includes: [], relations: [] };
 export default (parse) => {
   const Parse = parse;
-  return (entityParam) => {
-    let entity = entityParam;
-    if (entityParam === 'Installation') {
-      entity = Parse.Installation;
-    }
-
-    return {
-      create: () => {
-        const Entity = Parse.Object.extend(entity);
-        return new Entity();
-      },
-      getAll: (params = {}) => {
-        const queryParams = Object.assign({}, getParams, params);
-        const ParseObject = Parse.Object.extend(entity);
-        const query = new Parse.Query(ParseObject);
-        if (queryParams.includes && queryParams.includes.length > 0) {
-          getIncludes(undefined, queryParams.includes).forEach((include) => {
-            query.include(include);
-          });
-        }
-        queryParams.filters.forEach(filter => {
-          query.equalTo(filter.field, filter.value);
+  return (entity) => ({
+    create: () => {
+      const Entity = Parse.Object.extend(entity);
+      return new Entity();
+    },
+    getAll: (params = {}) => {
+      const queryParams = Object.assign({}, getParams, params);
+      const ParseObject = Parse.Object.extend(entity);
+      const query = new Parse.Query(ParseObject);
+      if (queryParams.includes && queryParams.includes.length > 0) {
+        getIncludes(undefined, queryParams.includes).forEach((include) => {
+          query.include(include);
         });
-        return Rx.Observable.fromPromise(query.find());
-      },
-      get: (id, params = {}) => {
-        const queryParams = Object.assign({}, getParams, params);
-        const ParseObject = Parse.Object.extend(entity);
-        const query = new Parse.Query(ParseObject);
-        if (queryParams.includes && queryParams.includes.length > 0) {
-          getIncludes(undefined, queryParams.includes).forEach((include) => {
-            query.include(include);
-          });
-        }
-        return Rx.Observable.fromPromise(query.get(id));
-      },
-      getRelation: (parseObject, field, params) => {
-        const relation = parseObject.relation(field);
-        const query = relation.query();
-        const queryParams = Object.assign({}, getParams, params);
-        if (queryParams.includes && queryParams.includes.length > 0) {
-          getIncludes(undefined, queryParams.includes).forEach((include) => {
-            query.include(include);
-          });
-        }
-        return Rx.Observable.fromPromise(query.find());
-      },
-      save: (parseObject) => Rx.Observable.fromPromise(parseObject.save())
-    };
-  };
+      }
+      queryParams.filters.forEach(filter => {
+        query.equalTo(filter.field, filter.value);
+      });
+      return Rx.Observable.fromPromise(query.find());
+    },
+    get: (id, params = {}) => {
+      const queryParams = Object.assign({}, getParams, params);
+      const ParseObject = Parse.Object.extend(entity);
+      const query = new Parse.Query(ParseObject);
+      if (queryParams.includes && queryParams.includes.length > 0) {
+        getIncludes(undefined, queryParams.includes).forEach((include) => {
+          query.include(include);
+        });
+      }
+      return Rx.Observable.fromPromise(query.get(id));
+    },
+    getRelation: (parseObject, field, params) => {
+      const relation = parseObject.relation(field);
+      const query = relation.query();
+      const queryParams = Object.assign({}, getParams, params);
+      if (queryParams.includes && queryParams.includes.length > 0) {
+        getIncludes(undefined, queryParams.includes).forEach((include) => {
+          query.include(include);
+        });
+      }
+      return Rx.Observable.fromPromise(query.find());
+    },
+    save: (parseObject) => Rx.Observable.fromPromise(parseObject.save())
+  });
 };
