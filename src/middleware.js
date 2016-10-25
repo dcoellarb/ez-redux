@@ -61,7 +61,8 @@ export default (parse) => {
             );
             next({
               type: `SET_${action.meta.entity.toUpperCase()}S`,
-              items: serializedItems
+              items: serializedItems,
+              clear: action.meta.clear
             });
 
             // Update pointer in their reducers
