@@ -62,7 +62,7 @@ export const deserializeParseObject = (config, entityConfig, serializedObject, p
   }
   Object.keys(serializedObject).map((prop) => {
     if (entityConfig.nonStoredFields.indexOf(prop) === -1) {
-      if (!serializedObject[prop]) {
+      if (!serializedObject.hasOwnProperty(prop)) {
         serializedObject.object.unset(prop);
       } else if (serializedObject[prop].object) {
         serializedObject.object.set(prop, serializedObject[prop].object);
