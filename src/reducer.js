@@ -44,6 +44,9 @@ export default (
     // List reducers
     case `SET_${entity.toUpperCase()}S`: {
       let list = [...state.list];
+      if (action.meta.clear) {
+        list = [];
+      }
       if (action.items) {
         action.items.forEach((item) => { list = replactItem(list, item); });
       }
