@@ -19,6 +19,26 @@ const replactItem = (stateList, item) => {
   return list;
 };
 
+const mantainRelations = (list, item, relations) => {
+  const currentItem = Object.assign({},
+    list[findItemIndex(list, item)]
+  );
+  const updatedItem = Object.assign({}, item);
+  if (relations && relations.length > 0) {
+    relations.forEach(r => {
+      if (item[r.field]) {
+        // Get current relations as this could have change
+        updatedItem[r.field].relations = [...currentItem[r.field].relations];
+      } else {
+        updatedItem[r.field] = {
+          relations: []
+        };
+      }
+    });
+  }
+  return updatedItem;
+};
+
 // Reducer
 const defaultState = { list: [], edit: undefined, edits: [], status: { message: '', count: 0 } };
 export default (
@@ -48,10 +68,14 @@ export default (
         list = [];
       }
       if (action.items) {
-        action.items.forEach((item) => { list = replactItem(list, item); });
+        action.items.forEach((item) => {
+          const updatedItem = mantainRelations(list, item, action.relations);
+          list = replactItem(list, updatedItem);
+        });
       }
       if (action.item) {
-        list = replactItem(state.list, action.item);
+        const updatedItem = mantainRelations(list, action.item, action.relations);
+        list = replactItem(state.list, updatedItem);
       }
       return Object.assign({}, state, {
         list
@@ -63,6 +87,17 @@ export default (
         ...state.list.slice(0, index),
         ...state.list.slice(index + 1)
       ] });
+    }
+    case `ADD_${entity.toUpperCase()}_RELATION`: {
+      const item = Object.assign({},
+        state.list[findItemIndex(state.list, action.item)]
+      );
+      item[action.relation].relations = [
+        ...item[action.relation].relations,
+        action.relatedItem
+      ];
+      const list = replactItem(state.list, item);
+      return list;
     }
 
     // Edit reducers

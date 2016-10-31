@@ -249,22 +249,10 @@ export default (parse) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
             const updatedItem = serializeParseObject(config, entityConfig, result);
 
-            // Maintain exiting relations
-            if (entityConfig.mapRelationsToFields) {
-              entityConfig.mapRelationsToFields.forEach(r => {
-                if (updatedItem[r.field]) {
-                  updatedItem[r.field].relations = action.item[r.field].relations;                  
-                } else {
-                  updatedItem[r.field] = {
-                    relations: []
-                  };
-                }
-              });
-            }
-
             next(Object.assign({}, action, {
               type: `SET_${entityConfig.name.toUpperCase()}S`,
-              item: updatedItem
+              item: updatedItem,
+              relations: entityConfig.mapRelationsToFields
             }));
             setStatus('');
             observer.next(updatedItem);
@@ -291,13 +279,16 @@ export default (parse) => {
           (result) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
 
-            const updatedItem = serializeParseObject(config, entityConfig, result);
-            updatedItem[action.meta.relation].relations = [...action.item[action.meta.relation].relations, action.meta.relatedItem];
-
+            const updatedItem = serializeParseObject(config, entityConfig, result);            
+            
+            // Add relation in reducer
             next(Object.assign({}, action, {
-              type: `SET_${entityConfig.name.toUpperCase()}S`,
-              item: updatedItem
+              type: `ADD_${entityConfig.name.toUpperCase()}_RELATION`,
+              item: updatedItem,
+              relation: action.meta.relation,
+              relatedItem: action.meta.relatedItem
             }));
+
             setStatus('');
             observer.next(updatedItem);
             observer.complete();
