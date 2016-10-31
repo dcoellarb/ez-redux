@@ -97,7 +97,9 @@ export default (
         action.relatedItem
       ];
       const list = replactItem(state.list, item);
-      return list;
+      return Object.assign({}, state, {
+        list
+      });
     }
 
     // Edit reducers
