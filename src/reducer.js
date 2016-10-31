@@ -101,6 +101,23 @@ export default (
         list
       });
     }
+    case `REMOVE_${entity.toUpperCase()}_RELATION`: {
+      const item = Object.assign({},
+        state.list[findItemIndex(state.list, action.item)]
+      );
+
+      const currentRelatedItem = item[action.relation].relations.find(r => r.id === action.relatedItem.id);
+      const index = item[action.relation].relations.indexOf(currentRelatedItem);
+      item[action.relation].relations = [
+        ...item[action.relation].relations.slice(0, index),
+        ...item[action.relation].relations.slice(index + 1)
+      ];
+
+      const list = replactItem(state.list, item);
+      return Object.assign({}, state, {
+        list
+      });
+    }
 
     // Edit reducers
     case `SET_${entity.toUpperCase()}_EDIT`: {

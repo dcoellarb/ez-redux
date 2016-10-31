@@ -314,18 +314,13 @@ export default (parse) => {
         .subscribe(
           (result) => {
             entityConfig = initializeEntityConfig(config, action.meta.entity);
-
-            const currentItem = action.item[action.meta.relation].relations.find(r => r.id === action.meta.relatedItem.id);
-            const index = action.item[action.meta.relation].relations.indexOf(currentItem);
             const updatedItem = serializeParseObject(config, entityConfig, result);
-            updatedItem[action.meta.relation].relations = [
-              ...action.item[action.meta.relation].relations.slice(0, index),
-              ...action.item[action.meta.relation].relations.slice(index + 1)
-            ];
-
+            // Remove relation in reducer
             next(Object.assign({}, action, {
-              type: `SET_${entityConfig.name.toUpperCase()}S`,
-              item: updatedItem
+              type: `REMOVE_${entityConfig.name.toUpperCase()}_RELATION`,
+              item: updatedItem,
+              relation: action.meta.relation,
+              relatedItem: action.meta.relatedItem
             }));
             setStatus('');
             observer.next(updatedItem);
