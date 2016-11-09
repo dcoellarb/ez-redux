@@ -57,5 +57,6 @@ export default (parse) => {
       return Rx.Observable.fromPromise(query.find());
     },
     save: (parseObject) => Rx.Observable.fromPromise(parseObject.save())
+    delete: (parseObject) => Rx.Observable.fromPromise(parseObject.destroy())
   });
 };

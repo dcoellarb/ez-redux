@@ -334,6 +334,23 @@ export default (parse) => {
         );
       return subscriber;
     };
+    const delete = (observer) => {
+      let entityConfig = initializeEntityConfig(config, action.meta.entity);
+      const subscriber = api(entityConfig.name)
+      .delete(action.item.object)
+      .subscribe(
+        (result) => {
+          next(action);
+          observer.next(action.item);
+          observer.complete();
+        },
+        (error) => {
+          observer.error(error);
+        },
+        () => {}
+      );
+      return subscriber;
+    };
 
     // Edit actions
     const change = (observer) => {
@@ -446,6 +463,9 @@ export default (parse) => {
       }
       case 'removeRelation': {
         return Rx.Observable.create(observer => removeRelation(observer));
+      }
+      case 'delete': {
+        return Rx.Observable.create(observer => delete(observer));
       }
       case 'change': {
         return Rx.Observable.create(observer => change(observer));

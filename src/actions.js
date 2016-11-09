@@ -33,6 +33,7 @@ export default (entity) => {
     }),
     delete: (item) => ({
       type: `REMOVE_${entity.toUpperCase()}`,
+      meta: { entity, action: 'delete' },
       item
     }),
 
