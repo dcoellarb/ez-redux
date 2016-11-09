@@ -334,7 +334,7 @@ export default (parse) => {
         );
       return subscriber;
     };
-    const delete = (observer) => {
+    const deleteItem = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
       const subscriber = api(entityConfig.name)
       .delete(action.item.object)
@@ -465,7 +465,7 @@ export default (parse) => {
         return Rx.Observable.create(observer => removeRelation(observer));
       }
       case 'delete': {
-        return Rx.Observable.create(observer => delete(observer));
+        return Rx.Observable.create(observer => deleteItem(observer));
       }
       case 'change': {
         return Rx.Observable.create(observer => change(observer));
