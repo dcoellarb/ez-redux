@@ -1,6 +1,10 @@
 export default (entity) => {
   const entityActions = {
     // List actions
+    clear: () => ({
+      type: `CLEAR_${entity.toUpperCase()}S`,
+      items: []
+    }),
     getAllAndClear: (params) => ({
       type: `GET_${entity.toUpperCase()}S`,
       meta: { entity, action: 'getAll', params, clear: true },

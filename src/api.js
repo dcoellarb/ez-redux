@@ -30,7 +30,15 @@ export default (parse) => {
         });
       }
       queryParams.filters.forEach(filter => {
-        query.equalTo(filter.field, filter.value);
+        if (filter.filters) {
+          const innerQuery = new Parse.Query(filter.entity);
+          filter.filters.forEach(f =>
+            innerQuery.equalTo(f.field, f.value)
+          );
+          query.matchesQuery(filter.field, innerQuery);
+        } else {
+          query.equalTo(filter.field, filter.value);
+        }
       });
       return Rx.Observable.fromPromise(query.find());
     },

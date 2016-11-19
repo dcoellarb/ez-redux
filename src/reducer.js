@@ -62,6 +62,11 @@ export default (
     }
 
     // List reducers
+    case `CLEAR_${entity.toUpperCase()}S`: {
+      return Object.assign({}, state, {
+        list: []
+      });
+    }
     case `SET_${entity.toUpperCase()}S`: {
       let list = [...state.list];
       if (action.clear) {
