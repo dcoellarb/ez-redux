@@ -50,7 +50,8 @@ export default (parse) => {
     // List actions
     const getAll = (observer) => {
       setStatus('loadingList');
-      api(action.meta.entity)
+      try {
+        api(action.meta.entity)
         .getAll(action.meta.params)   // Get all api
         .subscribe(
           (items) => {
@@ -172,58 +173,63 @@ export default (parse) => {
           },
           () => {}
         );
-
-      // return suscription;
+      } catch (error) {
+        observer.error(error);
+      }
     };
     const getRelation = (observer) => {
       setStatus('loadingRelation');
-      const suscription = api(action.meta.entity)
-        .getRelation(action.item.object, action.meta.relation, action.meta.params)
-        .subscribe(
-          (related) => {
-            const entityConfig = initializeEntityConfig(config, action.meta.entity);
-            const subEntity = entityConfig.mapRelationsToFields.find(e => e.field === action.meta.relation);
-            if (subEntity) {
-              const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
-              if (subEntityConfig) {
-                // Update item with relations
-                const serializedRelated = related.map(r => serializeParseObject(config, subEntityConfig, r));
-                const updatedData = {};
-                updatedData[action.meta.relation] = Object.assign({}, action.item[action.meta.relation], {
-                  relations: serializedRelated
-                });
-                next({
-                  type: `SET_${action.meta.entity.toUpperCase()}S`,
-                  item: updateSerializedObject(config, entityConfig, action.item, updatedData, parse)
-                });
+      try {
+        const suscription = api(action.meta.entity)
+          .getRelation(action.item.object, action.meta.relation, action.meta.params)
+          .subscribe(
+            (related) => {
+              const entityConfig = initializeEntityConfig(config, action.meta.entity);
+              const subEntity = entityConfig.mapRelationsToFields.find(e => e.field === action.meta.relation);
+              if (subEntity) {
+                const subEntityConfig = initializeEntityConfig(config, subEntity.entity);
+                if (subEntityConfig) {
+                  // Update item with relations
+                  const serializedRelated = related.map(r => serializeParseObject(config, subEntityConfig, r));
+                  const updatedData = {};
+                  updatedData[action.meta.relation] = Object.assign({}, action.item[action.meta.relation], {
+                    relations: serializedRelated
+                  });
+                  next({
+                    type: `SET_${action.meta.entity.toUpperCase()}S`,
+                    item: updateSerializedObject(config, entityConfig, action.item, updatedData, parse)
+                  });
 
-                // Update pointer in their reducer
-                next({
-                  type: `SET_${subEntity.entity.toUpperCase()}S`,
-                  items: serializedRelated
-                });
+                  // Update pointer in their reducer
+                  next({
+                    type: `SET_${subEntity.entity.toUpperCase()}S`,
+                    items: serializedRelated
+                  });
 
-                setStatus('');
-                observer.next(serializedRelated);
-                observer.complete();
+                  setStatus('');
+                  observer.next(serializedRelated);
+                  observer.complete();
+                } else {
+                  setStatus('');
+                  observer.error({message: `No entity config found for relation:${action.meta.relation}`});
+                }
               } else {
                 setStatus('');
                 observer.error({message: `No entity config found for relation:${action.meta.relation}`});
               }
-            } else {
+            },
+            (error) => {
+              console.dir(error);
               setStatus('');
-              observer.error({message: `No entity config found for relation:${action.meta.relation}`});
-            }
-          },
-          (error) => {
-            console.dir(error);
-            setStatus('');
-            observer.error(error);
-          },
-          () => {}
-        );
+              observer.error(error);
+            },
+            () => {}
+          );
 
-      return suscription;
+        return suscription;
+      } catch (error) {
+        observer.error(error);
+      }
     };
     const save = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
@@ -242,29 +248,34 @@ export default (parse) => {
         action.item,
         parse
       );
-      const subscriber = api(entityConfig.name)
-        .save(deserializedObject)
-        .subscribe(
-          (result) => {
-            entityConfig = initializeEntityConfig(config, action.meta.entity);
-            const updatedItem = serializeParseObject(config, entityConfig, result);
 
-            next(Object.assign({}, action, {
-              type: `SET_${entityConfig.name.toUpperCase()}S`,
-              item: updatedItem,
-              relations: entityConfig.mapRelationsToFields
-            }));
-            setStatus('');
-            observer.next(updatedItem);
-            observer.complete();
-          },
-          (error) => {
-            setStatus('');
-            observer.error(error);
-          },
-          () => {}
-        );
-      return subscriber;
+      try {
+        const subscriber = api(entityConfig.name)
+          .save(deserializedObject)
+          .subscribe(
+            (result) => {
+              entityConfig = initializeEntityConfig(config, action.meta.entity);
+              const updatedItem = serializeParseObject(config, entityConfig, result);
+
+              next(Object.assign({}, action, {
+                type: `SET_${entityConfig.name.toUpperCase()}S`,
+                item: updatedItem,
+                relations: entityConfig.mapRelationsToFields
+              }));
+              setStatus('');
+              observer.next(updatedItem);
+              observer.complete();
+            },
+            (error) => {
+              setStatus('');
+              observer.error(error);
+            },
+            () => {}
+          );
+        return subscriber;
+      } catch (error) {
+        observer.error(error);
+      }
     };
     const addRelation = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
@@ -273,34 +284,39 @@ export default (parse) => {
       relation.add(action.meta.relatedItem.object);
 
       setStatus('saving');
-      const subscriber = api(entityConfig.name)
-        .save(action.item.object)
-        .subscribe(
-          (result) => {
-            entityConfig = initializeEntityConfig(config, action.meta.entity);
 
-            const updatedItem = serializeParseObject(config, entityConfig, result);            
-            
-            // Add relation in reducer
-            next(Object.assign({}, action, {
-              type: `ADD_${entityConfig.name.toUpperCase()}_RELATION`,
-              item: updatedItem,
-              relation: action.meta.relation,
-              relatedItem: action.meta.relatedItem
-            }));
+      try {
+        const subscriber = api(entityConfig.name)
+          .save(action.item.object)
+          .subscribe(
+            (result) => {
+              entityConfig = initializeEntityConfig(config, action.meta.entity);
 
-            setStatus('');
-            observer.next(updatedItem);
-            observer.complete();
-          },
-          (error) => {
-            console.dir(error);
-            setStatus('');
-            observer.error(error);
-          },
-          () => {}
-        );
-      return subscriber;
+              const updatedItem = serializeParseObject(config, entityConfig, result);            
+              
+              // Add relation in reducer
+              next(Object.assign({}, action, {
+                type: `ADD_${entityConfig.name.toUpperCase()}_RELATION`,
+                item: updatedItem,
+                relation: action.meta.relation,
+                relatedItem: action.meta.relatedItem
+              }));
+
+              setStatus('');
+              observer.next(updatedItem);
+              observer.complete();
+            },
+            (error) => {
+              console.dir(error);
+              setStatus('');
+              observer.error(error);
+            },
+            () => {}
+          );
+        return subscriber;
+      } catch (error) {
+        observer.error(error);
+      }
     };
     const removeRelation = (observer) => {
       let entityConfig = initializeEntityConfig(config, action.meta.entity);
@@ -309,47 +325,34 @@ export default (parse) => {
       relation.remove(action.meta.relatedItem.object);
 
       setStatus('saving');
-      const subscriber = api(entityConfig.name)
-        .save(action.item.object)
-        .subscribe(
-          (result) => {
-            entityConfig = initializeEntityConfig(config, action.meta.entity);
-            const updatedItem = serializeParseObject(config, entityConfig, result);
-            // Remove relation in reducer
-            next(Object.assign({}, action, {
-              type: `REMOVE_${entityConfig.name.toUpperCase()}_RELATION`,
-              item: updatedItem,
-              relation: action.meta.relation,
-              relatedItem: action.meta.relatedItem
-            }));
-            setStatus('');
-            observer.next(updatedItem);
-            observer.complete();
-          },
-          (error) => {
-            setStatus('');
-            observer.error(error);
-          },
-          () => {}
-        );
-      return subscriber;
-    };
-    const deleteItem = (observer) => {
-      let entityConfig = initializeEntityConfig(config, action.meta.entity);
-      const subscriber = api(entityConfig.name)
-      .delete(action.item.object)
-      .subscribe(
-        (result) => {
-          next(action);
-          observer.next(action.item);
-          observer.complete();
-        },
-        (error) => {
-          observer.error(error);
-        },
-        () => {}
-      );
-      return subscriber;
+      try {
+        const subscriber = api(entityConfig.name)
+          .save(action.item.object)
+          .subscribe(
+            (result) => {
+              entityConfig = initializeEntityConfig(config, action.meta.entity);
+              const updatedItem = serializeParseObject(config, entityConfig, result);
+              // Remove relation in reducer
+              next(Object.assign({}, action, {
+                type: `REMOVE_${entityConfig.name.toUpperCase()}_RELATION`,
+                item: updatedItem,
+                relation: action.meta.relation,
+                relatedItem: action.meta.relatedItem
+              }));
+              setStatus('');
+              observer.next(updatedItem);
+              observer.complete();
+            },
+            (error) => {
+              setStatus('');
+              observer.error(error);
+            },
+            () => {}
+          );
+        return subscriber;
+      } catch (error) {
+        observer.error(error);
+      }
     };
 
     // Edit actions
@@ -408,6 +411,23 @@ export default (parse) => {
           observer.complete();
         }
       }
+    };
+    const deleteItem = (observer) => {
+      let entityConfig = initializeEntityConfig(config, action.meta.entity);
+      const subscriber = api(entityConfig.name)
+      .delete(action.item.object)
+      .subscribe(
+        (result) => {
+          next(action);
+          observer.next(action.item);
+          observer.complete();
+        },
+        (error) => {
+          observer.error(error);
+        },
+        () => {}
+      );
+      return subscriber;
     };
 
     // Edits actions
