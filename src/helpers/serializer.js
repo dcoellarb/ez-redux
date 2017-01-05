@@ -62,7 +62,7 @@ export const deserializeParseObject = (config, entityConfig, serializedObject, p
   }
   Object.keys(serializedObject).map((prop) => {
     if (entityConfig.nonStoredFields.indexOf(prop) === -1) {
-      if (!serializedObject.hasOwnProperty(prop)) {
+      if (!serializedObject.hasOwnProperty(prop) || serializedObject[prop] === undefined) {
         serializedObject.object.unset(prop);
       } else if (prop.toLowerCase() === 'acl') {
         serializedObject.object.setACL(serializedObject[prop]);
