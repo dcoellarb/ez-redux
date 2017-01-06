@@ -95,6 +95,7 @@ export const deserializeParseObject = (config, entityConfig, serializedObject, p
   });
   return serializedObject.object;
 };
+
 export const updateSerializedObject = (config, entityConfig, serializedObject, updates, parse) => {
   const newObject = Object.assign({}, serializedObject, updates);
   if (newObject.object) {

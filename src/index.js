@@ -3,9 +3,10 @@ import getActions from './actions';
 import reducer from './reducer';
 import * as selectors from './reducer';
 import middlewareEnvChooser from './middleware';
+import * as serializer from './helpers/serializer';
 
 export default (parse) => {
   const api = apiEnvChooser(parse);
   const middleware = middlewareEnvChooser(parse);
-  return { api, getActions, reducer, selectors, middleware };
+  return { api, getActions, reducer, selectors, middleware, serializer };
 };
