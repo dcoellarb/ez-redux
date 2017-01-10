@@ -89,7 +89,7 @@ export const deserializeParseObject = (config, entityConfig, serializedObject, p
           serializedObject.object.set(prop, serializedObject[prop]);
         }
       } else {
-        serializedObject.object.set(prop,serializedObject[prop]);
+        serializedObject.object.set(prop, serializedObject[prop]);
       }
     }
   });

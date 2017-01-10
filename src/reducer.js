@@ -28,7 +28,10 @@ const mantainRelations = (list, item, relations) => {
     relations.forEach(r => {
       if (item[r.field]) {
         // Get current relations as this could have change
-        updatedItem[r.field].relations = [...currentItem[r.field].relations];
+        updatedItem[r.field].relations = [];
+        if (currentItem[r.field] && currentItem[r.field].relations && currentItem[r.field].relations.length > 0) {
+          updatedItem[r.field].relations = [...currentItem[r.field].relations];
+        }
       } else {
         updatedItem[r.field] = {
           relations: []
