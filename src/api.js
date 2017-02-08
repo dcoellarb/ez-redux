@@ -12,6 +12,28 @@ const getIncludes = (prefix, includes) => {
   return list;
 };
 
+const applyFilter = (query, filter, Parse, entity) => {
+  if (filter.filters) {
+    const innerQuery = new Parse.Query(filter.entity);
+    filter.filters.forEach(f =>
+      innerQuery.equalTo(f.field, f.value)
+    );
+    query.matchesQuery(filter.field, innerQuery);
+  } else if (filter.orValues) {
+    const ParseObject = Parse.Object.extend(entity);
+    const orQueries = [];
+    filter.orValues.forEach(orValue => {
+      const orQuery = new Parse.Query(ParseObject);
+      orQuery.equalTo(filter.field, orValue);
+      orQueries.push(orQuery);
+    });
+    query._orQuery(orQueries);
+  } else {
+    query.equalTo(filter.field, filter.value);
+  }
+  return query;
+};
+
 const getParams = { filters: [], includes: [], relations: [] };
 export default (parse) => {
   const Parse = parse;
@@ -23,22 +45,14 @@ export default (parse) => {
     getAll: (params = {}) => {
       const queryParams = Object.assign({}, getParams, params);
       const ParseObject = Parse.Object.extend(entity);
-      const query = new Parse.Query(ParseObject);
+      let query = new Parse.Query(ParseObject);
       if (queryParams.includes && queryParams.includes.length > 0) {
         getIncludes(undefined, queryParams.includes).forEach((include) => {
           query.include(include);
         });
       }
       queryParams.filters.forEach(filter => {
-        if (filter.filters) {
-          const innerQuery = new Parse.Query(filter.entity);
-          filter.filters.forEach(f =>
-            innerQuery.equalTo(f.field, f.value)
-          );
-          query.matchesQuery(filter.field, innerQuery);
-        } else {
-          query.equalTo(filter.field, filter.value);
-        }
+        query = applyFilter(query, filter, Parse, entity);
       });
       return Rx.Observable.fromPromise(query.find());
     },
