@@ -33,8 +33,6 @@ export default (parse) => {
           if (include.includes && include.includes.length > 0) {
             setInnerPointers(subEntity.entity, include.includes, item[include.field]);
           }
-        } else {
-          console.log(`error mapPointToField not found for: ${include.field} in ${entity}`);
         }
       });
     };
@@ -142,7 +140,6 @@ export default (parse) => {
                             }
                           },
                           (error) => {
-                            console.dir(error);
                             setStatus('');
                             observer.error(error);
                           },
@@ -219,7 +216,6 @@ export default (parse) => {
               }
             },
             (error) => {
-              console.dir(error);
               setStatus('');
               observer.error(error);
             },
@@ -307,7 +303,6 @@ export default (parse) => {
               observer.complete();
             },
             (error) => {
-              console.dir(error);
               setStatus('');
               observer.error(error);
             },
